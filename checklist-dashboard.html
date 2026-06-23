@@ -457,14 +457,25 @@
 // ─────────────────────────────────────────
 // Data
 // ─────────────────────────────────────────
+const SCENARIO_STATUS = {
+  'not-started':    'not-started',
+  'preparing':      'preparing',
+  'blocked-preparer': 'blocked',
+  'blocked-deps':   'blocked',
+  'blocked-subtask':'blocked',
+  'ready-for-review':'ready-for-review',
+  'reviewing':      'reviewing',
+  'completed':      'completed',
+  'agent-max':      'reviewing',
+};
+
 const STATUS_STYLES = {
-  'not-started':      { label: 'Not started',  bg: '#f2f1f0', color: '#64615c' },
-  'in-progress':      { label: 'In progress',  bg: '#e8f0fe', color: '#1967d4' },
-  'preparing':        { label: 'Preparing',    bg: '#e8f0fe', color: '#1967d4' },
-  'ready-for-review': { label: 'Prepared',     bg: '#d1fae5', color: '#065f46' },
-  'reviewing':        { label: 'Under review', bg: '#ede9fe', color: '#6d28d9' },
-  'blocked':          { label: 'Blocked',      bg: '#fee793', color: '#3a3118' },
-  'change-requested': { label: 'Change req.',  bg: '#ffd59a', color: '#402a13' },
+  'not-started':      { label: 'Not Started',      bg: '#f2f1f0', color: '#64615c' },
+  'preparing':        { label: 'Preparing',         bg: '#e8f0fe', color: '#1967d4' },
+  'ready-for-review': { label: 'Ready for Review',  bg: '#f3e8ff', color: '#7c3aed' },
+  'reviewing':        { label: 'Reviewing',         bg: '#ede9fe', color: '#6d28d9' },
+  'blocked':          { label: 'Blocked',           bg: '#fee793', color: '#3a3118' },
+  'change-requested': { label: 'Change Requested',  bg: '#ffd59a', color: '#402a13' },
   'completed':        { label: 'Completed',    bg: '#dcfce7', color: '#166534' },
 };
 
@@ -548,8 +559,9 @@ function avatar(key) {
   return `<div class="av-init" style="background:${p.bg};color:${p.color};">${key}</div>`;
 }
 
-function statusBadge(key) {
-  const s = STATUS_STYLES[key] || STATUS_STYLES['not-started'];
+function statusBadge(scenarioKey) {
+  const statusKey = SCENARIO_STATUS[scenarioKey] || 'not-started';
+  const s = STATUS_STYLES[statusKey] || STATUS_STYLES['not-started'];
   return `<span class="status-badge" style="background:${s.bg};color:${s.color};">${s.label}</span>`;
 }
 
@@ -589,7 +601,7 @@ function renderTable() {
                 <span class="task-name">${task.name}</span>
               </div>
             </td>
-            <td>${statusBadge(task.status)}</td>
+            <td>${statusBadge(task.scenario)}</td>
             <td>
               <div class="person-cell">
                 ${avatar(task.prep)}
