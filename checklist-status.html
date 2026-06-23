@@ -1845,18 +1845,6 @@ function applyScenario(key) {
   updateSubtaskCounter();
   updateAllBadges();
 
-  // Show inline comment for any already-blocked preparer
-  prepList.querySelectorAll('.status-btn[data-status="blocked"][data-blocked-reason]').forEach(btn => {
-    const reason = btn.dataset.blockedReason;
-    if (!reason) return;
-    const rowEl = btn.closest('div[style]');
-    if (!rowEl || rowEl.nextElementSibling?.classList.contains('inline-comment-area')) return;
-    const area = document.createElement('div');
-    area.className = 'inline-comment-area';
-    area.innerHTML = `
-      <div style="font-size:13px; line-height:20px; color:#64615c; padding:4px 0 0 40px;">${reason}</div>`;
-    rowEl.insertAdjacentElement('afterend', area);
-  });
 }
 
 // ─────────────────────────────────────────
