@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Detail — Checklist Status</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif !important; box-sizing: border-box; }
+    body { margin: 0; background: #f0efee; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+
+    .panel { width: 480px; background: white; border: 0.7px solid #e1dfdd; overflow: hidden; }
+    .section { border-bottom: 0.7px solid #f2f1f0; }
+
+    .tab-btn { border: none; background: none; cursor: pointer; padding: 8px 2px; font-size: 10px; line-height: 16px; height: 32px; display: flex; align-items: center; color: #aba7a2; }
+    .tab-btn.active { color: #181716; font-weight: 500; border-bottom: 1.5px solid #181716; }
+
+    .avatar    { width: 24px; height: 24px; border-radius: 9999px; overflow: hidden; border: 0.5px solid rgba(0,0,0,0.16); flex-shrink: 0; }
+    .avatar-sm { width: 20px; height: 20px; border-radius: 9999px; overflow: hidden; border: 0.7px solid #e1dfdd; flex-shrink: 0; }
+    .av-init { width:24px; height:24px; border-radius:9999px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:600; flex-shrink:0; border:0.5px solid rgba(0,0,0,0.10); }
+    .avatar img, .avatar-sm img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .badge-neutral { background: #f2f1f0; color: #181716; border-radius: 9999px; padding: 2px 8px; font-size: 10px; line-height: 16px; white-space: nowrap; }
+    .badge-orange  { background: #ffd59a; color: #402a13; border-radius: 9999px; padding: 2px 8px; font-size: 10px; line-height: 16px; white-space: nowrap; }
+    .tag { background: #f8f7f6; color: #64615c; border-radius: 6px; padding: 3px 8px; font-size: 10px; line-height: 16px; white-space: nowrap; }
+
+    .btn-outline { border: 0.7px solid #e1dfdd; border-radius: 8px; padding: 6px 8px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; background: white; transition: background 0.15s; }
+    .btn-outline:hover { background: #f8f7f6; }
+
+    .checkbox-cell { width: 16px; height: 16px; border: 1px solid #e1dfdd; border-radius: 4px; flex-shrink: 0; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .checkbox-cell.checked { background: #1967d4; border-color: #1967d4; }
+
+    .upload-zone { border: 0.5px solid #f2f1f0; border-radius: 12px; padding: 16px 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    .icon-btn { padding: 4px; border: none; background: transparent; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .icon-btn:hover { background: #f2f1f0; }
+
+    /* edit form */
+    .field-label { font-size: 10px; line-height: 16px; color: #64615c; font-weight: 500; display: block; margin-bottom: 6px; }
+    .input-box { width: 100%; border: 0.7px solid #e1dfdd; border-radius: 8px; padding: 8px 12px; font-size: 10px; line-height: 16px; color: #181716; background: white; outline: none; }
+    .input-box:focus { border-color: #1967d4; }
+    .input-select { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 0.7px solid #e1dfdd; border-radius: 8px; padding: 8px 10px 8px 12px; font-size: 10px; line-height: 16px; color: #181716; background: white; cursor: pointer; height: 32px; }
+    .input-select:hover { background: #f8f7f6; }
+    .textarea-box { width: 100%; height: 128px; border: 0.5px solid #e1dfdd; border-radius: 8px; padding: 12px; font-size: 10px; line-height: 16px; color: #181716; background: white; resize: none; outline: none; }
+    .textarea-box::placeholder { color: #aba7a2; }
+    .textarea-box:focus { border-color: #1967d4; }
+
+    /* assignee row */
+    .assignee-select { display: flex; align-items: center; justify-content: space-between; border: 0.7px solid #e1dfdd; border-radius: 8px; padding: 8px 10px 8px 12px; background: white; cursor: pointer; flex: 1; min-width: 0; gap: 8px; user-select: none; }
+    .assignee-select:hover { background: #f8f7f6; }
+    .assignee-select.open { border-color: #1967d4; background: white; }
+    .assignee-inner { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden; }
+
+    .bd-cd-group { display: flex; border: 1px solid #e1dfdd; border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+    .bd-cd-btn { padding: 8px 14px; font-size: 13px; line-height: 20px; border: none; cursor: pointer; background: white; color: #64615c; border-right: 1px solid #e1dfdd; min-height: 36px; }
+    .bd-cd-btn:last-child { border-right: none; }
+    .bd-cd-btn.active { background: #f2f1f0; color: #45433f; }
+
+    .day-input { border: 0.5px solid #e1dfdd; border-radius: 8px; padding: 8px 12px; font-size: 13px; line-height: 20px; color: #181716; background: white; outline: none; width: 52px; height: 36px; flex-shrink: 0; text-align: center; }
+    .day-input::placeholder { color: #aba7a2; }
+    .day-input:focus { border-color: #1967d4; }
+
+    .recur-banner { background: #f8f7f6; border-radius: 8px; padding: 8px 16px; display: flex; align-items: center; gap: 8px; }
+
+    .btn-discard { background: #f8f7f6; border: none; border-radius: 8px; padding: 6px 10px; font-size: 11px; line-height: 16px; color: #181716; cursor: pointer; }
+    .btn-discard:hover { background: #f2f1f0; }
+    .btn-save { background: #1967d4; border: none; border-radius: 8px; padding: 6px 8px; font-size: 11px; line-height: 16px; color: white; cursor: pointer; }
+    .btn-save:hover { background: #1557b8; }
+
+    /* assignee dropdown */
+    #assignee-dropdown {
+      position: fixed;
+      background: white;
+      border: 0.7px solid #e1dfdd;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      z-index: 9999;
+      display: none;
+      overflow-y: auto;
+      max-height: 220px;
+    }
+    .dd-option {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px; line-height: 20px; color: #181716;
+    }
+    .dd-option:hover { background: #f8f7f6; }
+    .dd-option img { border-radius: 50%; flex-shrink: 0; }
+
+    .hidden { display: none !important; }
+
+    /* status button hover */
+    .status-btn:hover { background: #f2f1f0 !important; }
+    .status-btn.active { background: #f2f1f0 !important; }
+
+    /* status menu options */
+    .status-opt { display:flex; align-items:center; gap:8px; padding:8px 16px 8px 10px; cursor:pointer; font-size:13px; line-height:20px; color:#64615c; border-radius:6px; margin:0 6px; }
+    .status-opt:hover { background:#f2f1f0; }
+    .status-opt.current { background:#f2f1f0; color:#45433f; }
+  </style>
+</head>
+<body>
+
+<!-- shared assignee dropdown -->
+<div id="assignee-dropdown"></div>
+<!-- model picker dropdown for Max Agent -->
+<div id="model-dropdown">
+  <div class="model-option selected" data-model="Auto">
+    <div class="model-option-left">
+      <span class="model-option-name">Auto</span>
+      <span class="model-option-desc">Best model for the task</span>
+    </div>
+    <svg class="model-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5 6.5-7" stroke="#1967d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="model-option" data-model="Fast">
+    <div class="model-option-left">
+      <span class="model-option-name">Fast</span>
+      <span class="model-option-desc">Quick responses, lower cost</span>
+    </div>
+    <svg class="model-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5 6.5-7" stroke="#1967d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="model-option" data-model="Smart">
+    <div class="model-option-left">
+      <span class="model-option-name">Smart</span>
+      <span class="model-option-desc">Most capable, best for complex tasks</span>
+    </div>
+    <svg class="model-check" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5 6.5-7" stroke="#1967d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</div>
+<!-- shared status menu -->
+<div id="status-menu" style="position:fixed;background:white;border:0.5px solid rgba(0,0,0,0.10);border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,0.05),0 4px 16px rgba(0,0,0,0.08);z-index:9999;display:none;width:175px;overflow:hidden;padding:4px 0;"></div>
+
+<!-- inline comment CSS -->
+<!-- Max agent CSS -->
+<style>
+  .max-agent-row { display:flex; align-items:center; justify-content:space-between; padding:4px 0; }
+  .max-state-btn { width:32px; height:32px; padding:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:none; background:transparent; cursor:pointer; border-radius:6px; }
+  .max-state-btn:hover { background:#f2f1f0; }
+  .max-avatar {
+    width:24px; height:24px; border-radius:9999px; flex-shrink:0;
+    border:0.5px solid rgba(0,0,0,0.16);
+    background: linear-gradient(188.24deg, rgb(6,74,220) 12.23%, rgb(59,158,244) 24.94%, rgb(6,74,220) 61.6%, rgb(59,158,244) 93.68%);
+  }
+  .max-auto-btn {
+    display:inline-flex; align-items:center; gap:3px;
+    border:none; background:none; cursor:pointer; padding:2px 4px; margin-left:-4px;
+    font-size:13px; color:#45433f; font-family:inherit; line-height:20px;
+    border-radius:6px;
+  }
+  .max-auto-btn:hover { background:#f2f1f0; }
+
+  #model-dropdown {
+    position:fixed;
+    background:white;
+    border:0.7px solid #e1dfdd;
+    border-radius:10px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.12);
+    z-index:9999;
+    display:none;
+    min-width:192px;
+    padding:4px;
+    overflow:hidden;
+  }
+  #model-dropdown.open { display:block; }
+  .model-option {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 10px; border-radius:6px; cursor:pointer;
+    font-size:13px; line-height:20px;
+  }
+  .model-option:hover { background:#f8f7f6; }
+  .model-option.selected { color:#1967d4; }
+  .model-option-left { display:flex; flex-direction:column; gap:1px; }
+  .model-option-name { font-size:13px; line-height:20px; color:#181716; }
+  .model-option.selected .model-option-name { color:#1967d4; font-weight:500; }
+  .model-option-desc { font-size:11px; line-height:16px; color:#aba7a2; }
+  .model-check { width:16px; height:16px; flex-shrink:0; opacity:0; }
+  .model-option.selected .model-check { opacity:1; }
+  .max-run-btn {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#1967d4; color:white; border:none; cursor:pointer;
+    padding:2px 6px; border-radius:6px; font-size:13px; font-family:inherit; line-height:20px;
+    white-space:nowrap;
+  }
+  .max-run-btn:hover { background:#1558b0; }
+</style>
+
+<style>
+  .inline-comment-area { display:flex; flex-direction:column; gap:8px; padding:4px 0 8px 0; }
+  .inline-comment-textarea { width:100%; min-height:96px; border:1px solid #e1dfdd; border-radius:8px; padding:16px; font-size:13px; line-height:20px; color:#181716; font-family:inherit; resize:vertical; outline:none; box-shadow:0 1px 2px rgba(0,0,0,0.05); box-sizing:border-box; }
+  .inline-comment-textarea::placeholder { color:#aba7a2; }
+  .inline-comment-textarea:focus { border-color:#1967d4; }
+  .inline-comment-actions { display:flex; gap:8px; justify-content:flex-end; }
+  .inline-comment-cancel { font-size:11px; color:#181716; background:#f8f7f6; border:none; cursor:pointer; padding:2px 6px; border-radius:8px; font-family:inherit; line-height:16px; }
+  .inline-comment-cancel:hover { background:#eeedec; }
+  .inline-comment-submit { font-size:11px; color:white; background:#1967d4; border:none; cursor:pointer; padding:2px 6px; border-radius:6px; font-family:inherit; line-height:16px; }
+  .inline-comment-submit:hover { background:#1558b0; }
+</style>
+
+<!-- new review note modal -->
+<div id="rn-modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.18);z-index:10003;display:none;align-items:flex-start;justify-content:center;padding-top:80px;">
+  <div style="background:white;border-radius:12px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.16);overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 12px;">
+      <span style="font-size:13px;font-weight:500;color:#181716;">New Review Note</span>
+      <div style="display:flex;gap:8px;">
+        <button id="rn-cancel" style="font-size:10px;color:#64615c;border:0.7px solid #e1dfdd;background:white;cursor:pointer;padding:5px 12px;border-radius:6px;font-family:inherit;">Cancel</button>
+        <button id="rn-save"   style="font-size:10px;color:white;background:#181716;border:none;cursor:pointer;padding:5px 12px;border-radius:6px;font-family:inherit;">Save</button>
+      </div>
+    </div>
+    <div style="padding:0 16px 12px;">
+      <textarea id="rn-content" placeholder="Write a review note..." style="width:100%;min-height:120px;border:0.7px solid #e1dfdd;border-radius:8px;padding:10px 12px;font-size:13px;line-height:20px;color:#181716;resize:none;outline:none;font-family:inherit;box-sizing:border-box;"></textarea>
+    </div>
+    <div style="padding:0 16px 16px;display:flex;align-items:center;gap:12px;border-top:0.7px solid #f2f1f0;padding-top:12px;">
+      <span style="font-size:10px;color:#64615c;flex-shrink:0;">Assignee</span>
+      <select id="rn-assignee" style="flex:1;border:0.7px solid #e1dfdd;border-radius:6px;padding:5px 8px;font-size:10px;color:#181716;outline:none;font-family:inherit;background:white;">
+        <option value="andi"   data-avatar="https://www.figma.com/api/mcp/asset/1899e54c-698b-45ac-8555-ba9e3b52e0dd">Andi Lane</option>
+        <option value="olivia" data-avatar="https://www.figma.com/api/mcp/asset/c3de0b74-f0c2-47ed-a4f5-81c6ba4d893e">Olivia Rhye</option>
+        <option value="serena" data-avatar="https://www.figma.com/api/mcp/asset/7958692f-1c1a-4642-b40d-2cbc7deecce1">Serena Marindale</option>
+        <option value="eve"    data-avatar="https://www.figma.com/api/mcp/asset/cd22b2fc-93cc-4328-a219-bfb8da6fcf92">Eve Leroy</option>
+        <option value="loki"   data-avatar="https://www.figma.com/api/mcp/asset/0d839f88-617e-413d-9a91-e26c1a2cb99a">Loki Bright</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- blocked tooltip -->
+<div id="blocked-tooltip" style="position:fixed;display:none;z-index:10000;pointer-events:none;">
+  <div id="blocked-tooltip-body" style="background:#181716;color:white;font-size:10px;line-height:16px;padding:6px 12px;border-radius:8px;white-space:nowrap;box-shadow:0 12px 16px rgba(0,0,0,0.08),0 4px 6px rgba(0,0,0,0.04);"></div>
+  <div style="padding-left:10px;"><div style="width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #181716;"></div></div>
+</div>
+
+<div class="panel">
+
+  <!-- ════════════════ VIEW STATE ════════════════ -->
+  <div id="view-state">
+
+    <div style="padding:16px 24px;">
+      <div style="display:flex; gap:16px; align-items:flex-start;">
+        <p style="flex:1; font-size:13px; font-weight:500; line-height:20px; color:#181716; margin:0;">
+          Post interest transactions manually in investment account
+        </p>
+        <div style="display:flex; gap:4px; align-items:center; flex-shrink:0; margin-top:1px;">
+          <button class="icon-btn" id="btn-edit" title="Edit" style="padding:7px;">
+            <img src="https://www.figma.com/api/mcp/asset/3385c4e3-bc56-4505-9638-5a7bb7c6004b" width="16" height="16" alt="Edit" />
+          </button>
+          <button class="icon-btn" title="More" style="padding:7px;">
+            <img src="https://www.figma.com/api/mcp/asset/6a357187-1d97-4802-ac11-ff6a7ee9fc7e" width="16" height="16" alt="More" />
+          </button>
+          <button class="icon-btn" id="btn-close" title="Close" style="padding:6px;" onclick="if(window.parent!==window)window.parent.postMessage('close-drawer','*');">
+            <img src="https://www.figma.com/api/mcp/asset/a545a998-be90-4bee-b8b5-f4b80af208d0" width="20" height="20" alt="Close" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div style="height:0.7px; background:#f2f1f0;"></div>
+
+    <div style="background:#f8f7f6; border-bottom:0.7px solid #f2f1f0; padding:8px 24px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <img src="https://www.figma.com/api/mcp/asset/d55569d8-80d4-429f-a418-5d64830d08d2" width="16" height="16" alt="Repeat" style="flex-shrink:0;" />
+        <span style="font-size:10px; line-height:16px; color:#181716;">Recurs monthly</span>
+      </div>
+    </div>
+
+    <div style="border-bottom:0.7px solid #e1dfdd; padding:0 24px;">
+      <div style="display:flex; gap:12px;">
+        <button class="tab-btn active" data-tab="details">Details</button>
+        <button class="tab-btn" data-tab="activity">Activity</button>
+        <button class="tab-btn" data-tab="agent-runs">Agent Runs</button>
+        <button class="tab-btn" data-tab="max">Max</button>
+      </div>
+    </div>
+
+    <div id="tab-details">
+      <!-- Blocking reason banner — shown whenever any preparer/reviewer is blocked with a reason -->
+      <div id="blocked-banner" style="display:none; background:#f8f7f6; border-bottom:0.7px solid #f2f1f0; padding:8px 20px;">
+        <div id="blocked-banner-text" style="font-size:13px; line-height:20px; color:#64615c;"></div>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:24px;">
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:13px; line-height:20px; color:#64615c;">Preparers</span>
+            <span class="badge-neutral" id="view-preparers-badge">Not Started</span>
+          </div>
+          <div id="view-preparers-list">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="status-btn" data-status="not-started" title="Set status" style="width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <img class="status-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23e1dfdd' stroke-width='1'/%3E%3C/svg%3E" width="16" height="16" alt="Not Started" />
+              </button>
+              <div class="avatar"><img src="https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf" alt="Olivia Rhye" /></div>
+              <span style="font-size:13px; color:#181716;">Olivia Rhye</span>
+            </div>
+            <span style="font-size:13px; color:#64615c;">Due: Jun 5th</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="status-btn" data-status="not-started" title="Set status" style="width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <img class="status-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23e1dfdd' stroke-width='1'/%3E%3C/svg%3E" width="16" height="16" alt="Not Started" />
+              </button>
+              <div class="avatar"><img src="https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334" alt="Serena Marindale" /></div>
+              <span style="font-size:13px; color:#181716;">Serena Marindale</span>
+            </div>
+            <span style="font-size:13px; color:#64615c;">Due: Jun 5th</span>
+          </div>
+
+          <!-- Max Agent row -->
+          <div class="max-agent-row" id="max-agent-row">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="max-state-btn" id="max-state-btn" title="Agent Max state">
+                <img id="max-state-img" src="https://www.figma.com/api/mcp/asset/2c249358-41de-44cc-a2f5-927fd069bf80" width="16" height="16" alt="Running" />
+              </button>
+              <div class="max-avatar"></div>
+              <span style="font-size:13px; color:#181716;">Agent Max</span>
+              <button class="max-auto-btn" id="max-auto-btn">
+                <span id="max-model-label">Auto</span>
+                <img src="https://www.figma.com/api/mcp/asset/3c1c8ef0-35da-47ae-8eb6-730739f57e1f" width="12" height="12" alt="▾" />
+              </button>
+            </div>
+            <div id="max-right-area"></div>
+          </div>
+
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-size:13px; line-height:20px; color:#64615c;">Reviewers</span>
+            <span class="badge-neutral" id="view-reviewers-badge">Not Started</span>
+          </div>
+          <div id="view-reviewers-list">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="status-btn" data-status="not-started" title="Set status" style="width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <img class="status-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23e1dfdd' stroke-width='1'/%3E%3C/svg%3E" width="16" height="16" alt="Not Started" />
+              </button>
+              <div class="avatar"><img src="https://www.figma.com/api/mcp/asset/d5c5f6d1-8006-49e7-9cad-e2f78916dc92" alt="Eve Leroy" /></div>
+              <span style="font-size:13px; color:#181716;">Eve Leroy</span>
+            </div>
+            <span style="font-size:13px; color:#64615c;">Due: Jun 5th</span>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button class="status-btn" data-status="not-started" title="Set status" style="width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <img class="status-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23e1dfdd' stroke-width='1'/%3E%3C/svg%3E" width="16" height="16" alt="Not Started" />
+              </button>
+              <div class="avatar"><img src="https://www.figma.com/api/mcp/asset/3d098e55-ff64-43d1-b2a2-44a2de6e1cc7" alt="Loki Bright" /></div>
+              <span style="font-size:13px; color:#181716;">Loki Bright</span>
+            </div>
+            <span style="font-size:13px; color:#64615c;">Due: Jun 5th</span>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px; line-height:20px;">
+          <span style="color:#64615c;">Entity</span><span id="view-entity-val" style="color:#181716;">Parent Company (Consolidated)</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px; line-height:20px;">
+          <span style="color:#64615c;">Project</span><span id="view-project-val" style="color:#181716;">Accounts Payable</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px; line-height:20px;">
+          <span style="color:#64615c;">Status</span><span class="badge-neutral" id="task-status-badge">Not Started</span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:13px; line-height:20px;">
+          <span style="color:#64615c;">Tags</span><span id="view-tags"><span class="tag">#journal_entry</span></span>
+        </div>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:8px;">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Description</span>
+        <div id="view-description-text" style="font-size:13px; line-height:20px; color:#181716; display:flex; flex-direction:column; gap:2px;">
+          <span style="display:block">Download bank statement for period.</span>
+          <span style="display:block">Cash coding.</span>
+          <span style="display:block">Upload JE to NetSuite for review.</span>
+        </div>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;" id="view-dependencies-section">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Dependencies</span>
+        <div id="view-dependencies-list">
+          <div class="dep-row" style="display:flex; align-items:center; justify-content:space-between; padding:2px 0;">
+            <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+              <img src="https://www.figma.com/api/mcp/asset/1c240905-6994-4124-948e-62b1571098df" width="16" height="16" alt="" style="flex-shrink:0; opacity:0.45;" />
+              <span class="dep-name" style="font-size:13px; color:#181716; flex:1;">Download bank statement</span>
+            </div>
+            <button class="dep-status-badge" data-status="completed" style="background:#dcfce7;color:#166534;border:none;border-radius:9999px;padding:2px 8px;font-size:10px;line-height:16px;cursor:pointer;white-space:nowrap;font-family:inherit;">Completed</button>
+          </div>
+        </div>
+        <button class="btn-outline" id="add-dep-btn">
+          <img src="https://www.figma.com/api/mcp/asset/1a103ee0-2eea-4fef-99b5-5cfa34e094b2" width="16" height="16" alt="+" />
+          <span style="font-size:11px; color:#64615c; padding:0 2px;">Add Dependency</span>
+        </button>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;" id="view-subtasks-section">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Subtasks</span>
+          <span id="subtask-counter" style="font-size:10px; color:#aba7a2;"></span>
+        </div>
+        <div id="view-subtasks-list">
+          <div class="subtask-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+            <div class="checkbox-cell subtask-check" style="flex-shrink:0;"></div>
+            <span style="font-size:13px; color:#181716; flex:1;">123123</span>
+          </div>
+        </div>
+        <button class="btn-outline" id="add-subtask-btn">
+          <img src="https://www.figma.com/api/mcp/asset/783857d5-ce88-4d00-80d3-0f223404d88f" width="16" height="16" alt="+" />
+          <span style="font-size:11px; color:#64615c; padding:0 2px;">Add Subtasks</span>
+        </button>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;" id="view-review-notes-section">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Review Notes <span id="rn-counter" style="color:#aba7a2;"></span></span>
+        <div id="view-review-notes-list">
+          <div class="rn-row" style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="avatar"><img src="https://www.figma.com/api/mcp/asset/1899e54c-698b-45ac-8555-ba9e3b52e0dd" alt="Andi Lane" /></div>
+              <span style="font-size:13px; color:#181716;">Andi Lane</span>
+            </div>
+            <button class="rn-status-badge" data-status="open" style="background:#ffd59a;color:#402a13;border:none;border-radius:9999px;padding:2px 8px;font-size:10px;line-height:16px;cursor:pointer;white-space:nowrap;font-family:inherit;">Open</button>
+          </div>
+        </div>
+        <button class="btn-outline" id="add-rn-btn">
+          <img src="https://www.figma.com/api/mcp/asset/783857d5-ce88-4d00-80d3-0f223404d88f" width="16" height="16" alt="+" />
+          <span style="font-size:11px; color:#64615c; padding:0 2px;">Add a Review Note</span>
+        </button>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Attachment</span>
+        <div class="upload-zone">
+          <div style="width:40px; height:40px; background:#f8f7f6; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+            <img src="https://www.figma.com/api/mcp/asset/0f1d63f4-09cc-404c-a0d0-6a3cd52046d1" width="20" height="20" alt="Upload" />
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+            <div style="display:flex; gap:4px;">
+              <span style="font-size:10px; color:#1967d4; cursor:pointer;">Click to upload</span>
+              <span style="font-size:10px; color:#64615c;">or drag and drop</span>
+            </div>
+            <span style="font-size:10px; color:#64615c; text-align:center;">SVG, PNG, JPG or GIF (max. 800x400px)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Supporting Links</span>
+        <button class="btn-outline">
+          <img src="https://www.figma.com/api/mcp/asset/783857d5-ce88-4d00-80d3-0f223404d88f" width="16" height="16" alt="+" />
+          <span style="font-size:11px; color:#64615c; padding:0 2px;">Add Link</span>
+        </button>
+      </div>
+
+      <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:13px; line-height:20px; color:#64615c;">Journal References</span>
+        <button class="btn-outline">
+          <img src="https://www.figma.com/api/mcp/asset/783857d5-ce88-4d00-80d3-0f223404d88f" width="16" height="16" alt="+" />
+          <span style="font-size:11px; color:#64615c; padding:0 2px;">Add References</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="tab-activity"   class="hidden" style="padding:48px 24px; text-align:center; color:#aba7a2; font-size:13px;">No activity yet.</div>
+    <div id="tab-agent-runs" class="hidden" style="padding:48px 24px; text-align:center; color:#aba7a2; font-size:13px;">No agent runs yet.</div>
+    <div id="tab-max"        class="hidden" style="padding:48px 24px; text-align:center; color:#aba7a2; font-size:13px;">Max is empty.</div>
+
+  </div><!-- end #view-state -->
+
+
+  <!-- ════════════════ EDIT STATE ════════════════ -->
+  <div id="edit-state" class="hidden">
+
+    <!-- Header -->
+    <div style="padding:16px 24px 0 24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding-bottom:16px;">
+        <span style="font-size:11px; font-weight:500; line-height:16px; color:#181716;">Edit Task</span>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button class="btn-discard" id="btn-discard">Discard</button>
+          <button class="btn-save"    id="btn-save">Save</button>
+        </div>
+      </div>
+      <div style="height:0.7px; background:#f2f1f0; margin:0 -24px;"></div>
+    </div>
+
+    <!-- Task Name + Repeat + Start On -->
+    <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <label class="field-label">Task Name</label>
+        <input class="input-box" type="text" value="Post interest transactions manually in investment account" />
+      </div>
+      <div style="display:flex; gap:16px;">
+        <div style="flex:1; min-width:0;">
+          <label class="field-label">Repeat</label>
+          <div class="input-select">
+            <span style="font-size:10px; color:#181716;">Monthly</span>
+            <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" />
+          </div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <label class="field-label">Start On:</label>
+          <input class="input-box" type="text" value="07 / 2026" style="height:32px; padding:7px 12px;" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Preparers + Reviewers -->
+    <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:24px;">
+
+      <!-- Preparers -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Preparers</span>
+        <div id="preparers-list" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Olivia Rhye -->
+          <div class="assignee-row" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:16px; align-items:center;">
+              <div class="assignee-select" data-name="Olivia Rhye" data-avatar="https://www.figma.com/api/mcp/asset/f5a0f42d-8780-4eaa-a9ce-a4b55136fb8a">
+                <div class="assignee-inner">
+                  <div class="avatar-sm"><img src="https://www.figma.com/api/mcp/asset/f5a0f42d-8780-4eaa-a9ce-a4b55136fb8a" alt="Olivia Rhye" /></div>
+                  <span style="font-size:13px; color:#181716; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Olivia Rhye</span>
+                </div>
+                <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" style="flex-shrink:0;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div class="bd-cd-group">
+                  <button class="bd-cd-btn active">BD</button>
+                  <button class="bd-cd-btn">CD</button>
+                </div>
+                <input class="day-input" type="text" value="+4" />
+                <button class="icon-btn remove-btn" title="Remove">
+                  <img src="https://www.figma.com/api/mcp/asset/113cfdcd-4f35-46f0-b46a-cea6928eab15" width="16" height="16" alt="×" />
+                </button>
+              </div>
+            </div>
+            <div class="recur-banner">
+              <img src="https://www.figma.com/api/mcp/asset/526220dc-fc5c-424c-a2d3-5018a7657844" width="16" height="16" alt="" style="flex-shrink:0;" />
+              <span style="font-size:10px; color:#64615c;">Recurs Monthly. Next 3 due dates: Jun 5th, Jul 7th, Aug 6th</span>
+            </div>
+          </div>
+          <!-- Serena Marindale -->
+          <div class="assignee-row" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:16px; align-items:center;">
+              <div class="assignee-select" data-name="Serena Marindale" data-avatar="https://www.figma.com/api/mcp/asset/fd5fc4ae-7315-4944-9d24-764c399b63fb">
+                <div class="assignee-inner">
+                  <div class="avatar-sm"><img src="https://www.figma.com/api/mcp/asset/fd5fc4ae-7315-4944-9d24-764c399b63fb" alt="Serena Marindale" /></div>
+                  <span style="font-size:13px; color:#181716; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Serena Marindale</span>
+                </div>
+                <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" style="flex-shrink:0;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div class="bd-cd-group">
+                  <button class="bd-cd-btn active">BD</button>
+                  <button class="bd-cd-btn">CD</button>
+                </div>
+                <input class="day-input" type="text" value="+4" />
+                <button class="icon-btn remove-btn" title="Remove">
+                  <img src="https://www.figma.com/api/mcp/asset/113cfdcd-4f35-46f0-b46a-cea6928eab15" width="16" height="16" alt="×" />
+                </button>
+              </div>
+            </div>
+            <div class="recur-banner">
+              <img src="https://www.figma.com/api/mcp/asset/526220dc-fc5c-424c-a2d3-5018a7657844" width="16" height="16" alt="" style="flex-shrink:0;" />
+              <span style="font-size:10px; color:#64615c;">Recurs Monthly. Next 3 due dates: Jun 5th, Jul 7th, Aug 6th</span>
+            </div>
+          </div>
+        </div>
+        <button id="add-preparer-btn" style="border:none; background:none; padding:0 2px; display:inline-flex; align-items:center; gap:4px; cursor:pointer; color:#45433f;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+          <img src="https://www.figma.com/api/mcp/asset/479cb78d-f45e-4716-b6f9-273a5b84fdcd" width="16" height="16" alt="+" />
+          <span style="font-size:11px; line-height:16px;">Add Preparer</span>
+        </button>
+      </div>
+
+      <!-- Reviewers -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Reviewers</span>
+        <div id="reviewers-list" style="display:flex; flex-direction:column; gap:16px;">
+          <!-- Eve Leroy -->
+          <div class="assignee-row" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:16px; align-items:center;">
+              <div class="assignee-select" data-name="Eve Leroy" data-avatar="https://www.figma.com/api/mcp/asset/e4bd3193-cbc1-4275-9411-7903f786c861">
+                <div class="assignee-inner">
+                  <div class="avatar-sm"><img src="https://www.figma.com/api/mcp/asset/e4bd3193-cbc1-4275-9411-7903f786c861" alt="Eve Leroy" /></div>
+                  <span style="font-size:13px; color:#181716; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Eve Leroy</span>
+                </div>
+                <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" style="flex-shrink:0;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div class="bd-cd-group">
+                  <button class="bd-cd-btn active">BD</button>
+                  <button class="bd-cd-btn">CD</button>
+                </div>
+                <input class="day-input" type="text" value="+4" />
+                <button class="icon-btn remove-btn" title="Remove">
+                  <img src="https://www.figma.com/api/mcp/asset/113cfdcd-4f35-46f0-b46a-cea6928eab15" width="16" height="16" alt="×" />
+                </button>
+              </div>
+            </div>
+            <div class="recur-banner">
+              <img src="https://www.figma.com/api/mcp/asset/526220dc-fc5c-424c-a2d3-5018a7657844" width="16" height="16" alt="" style="flex-shrink:0;" />
+              <span style="font-size:10px; color:#64615c;">Recurs Monthly. Next 3 due dates: Jun 5th, Jul 7th, Aug 6th</span>
+            </div>
+          </div>
+          <!-- Loki Bright -->
+          <div class="assignee-row" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:16px; align-items:center;">
+              <div class="assignee-select" data-name="Loki Bright" data-avatar="https://www.figma.com/api/mcp/asset/be363c1a-4c45-4068-8d66-737deed80ac0">
+                <div class="assignee-inner">
+                  <div class="avatar-sm"><img src="https://www.figma.com/api/mcp/asset/be363c1a-4c45-4068-8d66-737deed80ac0" alt="Loki Bright" /></div>
+                  <span style="font-size:13px; color:#181716; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Loki Bright</span>
+                </div>
+                <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" style="flex-shrink:0;" />
+              </div>
+              <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                <div class="bd-cd-group">
+                  <button class="bd-cd-btn active">BD</button>
+                  <button class="bd-cd-btn">CD</button>
+                </div>
+                <input class="day-input" type="text" value="+4" />
+                <button class="icon-btn remove-btn" title="Remove">
+                  <img src="https://www.figma.com/api/mcp/asset/113cfdcd-4f35-46f0-b46a-cea6928eab15" width="16" height="16" alt="×" />
+                </button>
+              </div>
+            </div>
+            <div class="recur-banner">
+              <img src="https://www.figma.com/api/mcp/asset/526220dc-fc5c-424c-a2d3-5018a7657844" width="16" height="16" alt="" style="flex-shrink:0;" />
+              <span style="font-size:10px; color:#64615c;">Recurs Monthly. Next 3 due dates: Jun 5th, Jul 7th, Aug 6th</span>
+            </div>
+          </div>
+        </div>
+        <button id="add-reviewer-btn" style="border:none; background:none; padding:0 2px; display:inline-flex; align-items:center; gap:4px; cursor:pointer; color:#45433f;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+          <img src="https://www.figma.com/api/mcp/asset/479cb78d-f45e-4716-b6f9-273a5b84fdcd" width="16" height="16" alt="+" />
+          <span style="font-size:11px; line-height:16px;">Add Reviewer</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Status / Project / Tags / Description -->
+    <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Status</span>
+        <span class="badge-neutral" id="edit-status-badge">Not Started</span>
+      </div>
+      <div>
+        <label class="field-label">Project</label>
+        <div class="input-select">
+          <span style="font-size:10px; color:#181716;">Accounts Payable</span>
+          <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" />
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Tags</label>
+        <div class="input-select">
+          <span style="font-size:10px; color:#181716;">#balance_recon</span>
+          <img src="https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1" width="16" height="16" alt="▾" />
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Description</label>
+        <textarea class="textarea-box" placeholder="Enter a description"></textarea>
+      </div>
+    </div>
+
+    <!-- Dependencies -->
+    <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Dependencies</span>
+      <button class="btn-outline">
+        <img src="https://www.figma.com/api/mcp/asset/c75b07f1-a6e3-4067-8847-8b6024c305e8" width="16" height="16" alt="+" />
+        <span style="font-size:11px; color:#64615c; padding:0 2px;">Add Dependency</span>
+      </button>
+    </div>
+
+    <!-- Subtasks -->
+    <div class="section" style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Subtasks</span>
+      <button class="btn-outline">
+        <img src="https://www.figma.com/api/mcp/asset/c75b07f1-a6e3-4067-8847-8b6024c305e8" width="16" height="16" alt="+" />
+        <span style="font-size:11px; color:#64615c; padding:0 2px;">Add Subtasks</span>
+      </button>
+    </div>
+
+    <!-- Attachment -->
+    <div style="padding:24px; display:flex; flex-direction:column; gap:16px;">
+      <span style="font-size:10px; line-height:16px; color:#64615c; font-weight:500;">Attachment</span>
+      <div class="upload-zone">
+        <div style="width:40px; height:40px; background:#f8f7f6; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+          <img src="https://www.figma.com/api/mcp/asset/b50ed569-61a6-4c35-bee2-b6e8b180e5b5" width="20" height="20" alt="Upload" />
+        </div>
+        <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+          <div style="display:flex; gap:4px;">
+            <span style="font-size:10px; color:#1967d4; cursor:pointer;">Click to upload</span>
+            <span style="font-size:10px; color:#64615c;">or drag and drop</span>
+          </div>
+          <span style="font-size:10px; color:#64615c; text-align:center;">SVG, PNG, JPG or GIF (max. 800x400px)</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end #edit-state -->
+
+</div><!-- end .panel -->
+
+<script>
+// ─────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────
+const CHEVRON_URL = 'https://www.figma.com/api/mcp/asset/fa56fa76-97d8-4740-8cb8-6310b27065e1';
+const REFRESH_URL = 'https://www.figma.com/api/mcp/asset/526220dc-fc5c-424c-a2d3-5018a7657844';
+const XCLOSE_URL  = 'https://www.figma.com/api/mcp/asset/113cfdcd-4f35-46f0-b46a-cea6928eab15';
+const PLUS_URL    = 'https://www.figma.com/api/mcp/asset/479cb78d-f45e-4716-b6f9-273a5b84fdcd';
+
+const TEAM = [
+  { name: 'Olivia Rhye',      avatar: 'https://www.figma.com/api/mcp/asset/f5a0f42d-8780-4eaa-a9ce-a4b55136fb8a' },
+  { name: 'Serena Marindale', avatar: 'https://www.figma.com/api/mcp/asset/fd5fc4ae-7315-4944-9d24-764c399b63fb' },
+  { name: 'Eve Leroy',        avatar: 'https://www.figma.com/api/mcp/asset/e4bd3193-cbc1-4275-9411-7903f786c861' },
+  { name: 'Loki Bright',      avatar: 'https://www.figma.com/api/mcp/asset/be363c1a-4c45-4068-8d66-737deed80ac0' },
+  { name: 'Andi Lane',        avatar: 'https://www.figma.com/api/mcp/asset/f3b56295-ba28-46f6-911b-6ea4b0347de1' },
+];
+
+// ─────────────────────────────────────────
+// View ↔ Edit toggle
+// ─────────────────────────────────────────
+document.getElementById('btn-edit').addEventListener('click', () => {
+  document.getElementById('view-state').classList.add('hidden');
+  document.getElementById('edit-state').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('btn-discard').addEventListener('click', () => {
+  document.getElementById('edit-state').classList.add('hidden');
+  document.getElementById('view-state').classList.remove('hidden');
+  closeDropdown();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  syncViewFromEdit();
+  document.getElementById('edit-state').classList.add('hidden');
+  document.getElementById('view-state').classList.remove('hidden');
+  closeDropdown();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ─────────────────────────────────────────
+// Sync view state from edit state on Save
+// ─────────────────────────────────────────
+function syncViewFromEdit() {
+  const startOnRaw = document.querySelector('#edit-state input[value="07 / 2026"], #edit-state .input-box[type="text"]:not([value^="Post"])');
+  // Parse "MM / YYYY" from the Start On field (second plain input in the basics section)
+  const startOnInput = document.querySelectorAll('#edit-state .input-box')[1];
+  const startOnVal   = startOnInput ? startOnInput.value : '07 / 2026';
+  const parts        = startOnVal.split('/').map(s => s.trim());
+  const startMonth   = parseInt(parts[0]) || 7;
+  const startYear    = parseInt(parts[1]) || 2026;
+
+  renderViewAssignees('preparers-list', 'view-preparers-list', startMonth, startYear);
+  renderViewAssignees('reviewers-list', 'view-reviewers-list', startMonth, startYear);
+  updateAllBadges();
+}
+
+function renderViewAssignees(editListId, viewListId, month, year) {
+  const rows    = document.querySelectorAll('#' + editListId + ' .assignee-row');
+  const viewEl  = document.getElementById(viewListId);
+  const entries = [];
+
+  rows.forEach(row => {
+    const sel    = row.querySelector('.assignee-select');
+    const name   = sel ? sel.dataset.name   : '';
+    const avatar = sel ? sel.dataset.avatar : '';
+    if (!name) return; // skip rows with no assignee selected
+
+    const dayInput  = row.querySelector('.day-input');
+    const dayVal    = dayInput ? dayInput.value.trim() : '';
+    const activeBtn = row.querySelector('.bd-cd-btn.active');
+    const dayType   = activeBtn ? activeBtn.textContent.trim() : 'BD';
+
+    entries.push({ name, avatar, day: dayVal, type: dayType });
+  });
+
+  viewEl.innerHTML = entries.map(e => {
+    const dueLabel = e.day ? computeDueLabel(e.day, e.type, month, year) : '';
+    return `
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="status-btn" data-status="not-started" title="Set status"
+            style="width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <img class="status-icon" src="${STATUS['not-started'].icon}" width="16" height="16" alt="Not Started" />
+          </button>
+          <div class="avatar"><img src="${e.avatar}" alt="${e.name}" /></div>
+          <span style="font-size:13px; color:#181716;">${e.name}</span>
+        </div>
+        ${dueLabel ? `<span style="font-size:13px; color:#64615c;">Due: ${dueLabel}</span>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// Compute a human-readable due date from a "+N" offset, BD/CD, and a start month/year.
+function computeDueLabel(dayStr, type, month, year) {
+  const offset = parseInt(dayStr.replace(/[^-\d]/g, ''));
+  if (isNaN(offset) || offset < 0) return dayStr;
+
+  const base = new Date(year, month - 1, 1); // 1st of the start month
+  let date   = new Date(base);
+
+  if (type === 'CD') {
+    date.setDate(date.getDate() + offset);
+  } else { // BD — skip Sat/Sun
+    let counted = 0;
+    while (counted < offset) {
+      date.setDate(date.getDate() + 1);
+      const d = date.getDay();
+      if (d !== 0 && d !== 6) counted++;
+    }
+  }
+
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d   = date.getDate();
+  const sfx = [11,12,13].includes(d) ? 'th'
+             : d % 10 === 1 ? 'st'
+             : d % 10 === 2 ? 'nd'
+             : d % 10 === 3 ? 'rd' : 'th';
+  return `${MONTHS[date.getMonth()]} ${d}${sfx}`;
+}
+
+// ─────────────────────────────────────────
+// Tabs
+// ─────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ['details', 'activity', 'agent-runs', 'max'].forEach(t =>
+      document.getElementById('tab-' + t).classList.add('hidden'));
+    document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+  });
+});
+
+// ─────────────────────────────────────────
+// Checkbox toggle (view state)
+// ─────────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  el.innerHTML = el.classList.contains('checked')
+    ? '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '';
+}
+
+// ─────────────────────────────────────────
+// BD / CD toggle
+// ─────────────────────────────────────────
+document.getElementById('edit-state').addEventListener('click', e => {
+  const btn = e.target.closest('.bd-cd-btn');
+  if (btn) {
+    btn.closest('.bd-cd-group').querySelectorAll('.bd-cd-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+});
+
+// ─────────────────────────────────────────
+// Day input → show / hide recur banner
+// ─────────────────────────────────────────
+document.getElementById('edit-state').addEventListener('input', e => {
+  if (!e.target.classList.contains('day-input')) return;
+  const row = e.target.closest('.assignee-row');
+  if (!row) return;
+  const existing = row.querySelector('.recur-banner');
+  if (e.target.value.trim()) {
+    if (!existing) row.appendChild(makeRecurBanner());
+  } else {
+    if (existing) existing.remove();
+  }
+});
+
+function makeRecurBanner() {
+  const d = document.createElement('div');
+  d.className = 'recur-banner';
+  d.innerHTML = `
+    <img src="${REFRESH_URL}" width="16" height="16" alt="" style="flex-shrink:0;" />
+    <span style="font-size:10px; color:#64615c;">Recurs Monthly. Next 3 due dates: Jun 5th, Jul 7th, Aug 6th</span>
+  `;
+  return d;
+}
+
+// ─────────────────────────────────────────
+// Remove assignee row
+// ─────────────────────────────────────────
+document.getElementById('edit-state').addEventListener('click', e => {
+  if (e.target.closest('.remove-btn')) {
+    e.target.closest('.assignee-row').remove();
+  }
+});
+
+// ─────────────────────────────────────────
+// Add preparer / reviewer
+// ─────────────────────────────────────────
+function makeEmptyAssigneeRow() {
+  const row = document.createElement('div');
+  row.className = 'assignee-row';
+  row.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
+  row.innerHTML = `
+    <div style="display:flex; gap:16px; align-items:center;">
+      <div class="assignee-select" data-name="" data-avatar="">
+        <div class="assignee-inner">
+          <span style="font-size:13px; color:#aba7a2;">Select assignee...</span>
+        </div>
+        <img src="${CHEVRON_URL}" width="16" height="16" alt="▾" style="flex-shrink:0;" />
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+        <div class="bd-cd-group">
+          <button class="bd-cd-btn active">BD</button>
+          <button class="bd-cd-btn">CD</button>
+        </div>
+        <input class="day-input" type="text" placeholder="+day" />
+        <button class="icon-btn remove-btn" title="Remove">
+          <img src="${XCLOSE_URL}" width="16" height="16" alt="×" />
+        </button>
+      </div>
+    </div>
+  `;
+  return row;
+}
+
+document.getElementById('add-preparer-btn').addEventListener('click', () => {
+  document.getElementById('preparers-list').appendChild(makeEmptyAssigneeRow());
+});
+
+document.getElementById('add-reviewer-btn').addEventListener('click', () => {
+  document.getElementById('reviewers-list').appendChild(makeEmptyAssigneeRow());
+});
+
+// ─────────────────────────────────────────
+// Assignee dropdown
+// ─────────────────────────────────────────
+const dropdown = document.getElementById('assignee-dropdown');
+let activeSelect = null;
+
+function openDropdown(selectEl) {
+  activeSelect = selectEl;
+  selectEl.classList.add('open');
+
+  // Populate options
+  dropdown.innerHTML = TEAM.map(m => `
+    <div class="dd-option" data-name="${m.name}" data-avatar="${m.avatar}">
+      <img src="${m.avatar}" width="20" height="20" alt="${m.name}" />
+      <span>${m.name}</span>
+    </div>
+  `).join('');
+
+  // Position below the select element
+  const rect = selectEl.getBoundingClientRect();
+  dropdown.style.width  = rect.width + 'px';
+  dropdown.style.top    = (rect.bottom + 4) + 'px';
+  dropdown.style.left   = rect.left + 'px';
+  dropdown.style.display = 'block';
+}
+
+function closeDropdown() {
+  if (activeSelect) activeSelect.classList.remove('open');
+  dropdown.style.display = 'none';
+  activeSelect = null;
+}
+
+// Delegate click on .assignee-select
+document.getElementById('edit-state').addEventListener('click', e => {
+  const sel = e.target.closest('.assignee-select');
+  if (sel) {
+    e.stopPropagation();
+    if (activeSelect === sel) { closeDropdown(); return; }
+    openDropdown(sel);
+    return;
+  }
+});
+
+// Select an option
+dropdown.addEventListener('click', e => {
+  const opt = e.target.closest('.dd-option');
+  if (!opt || !activeSelect) return;
+
+  const name   = opt.dataset.name;
+  const avatar = opt.dataset.avatar;
+
+  // Update the select button
+  const inner = activeSelect.querySelector('.assignee-inner');
+  inner.innerHTML = `
+    <div class="avatar-sm"><img src="${avatar}" alt="${name}" /></div>
+    <span style="font-size:13px; color:#181716; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${name}</span>
+  `;
+  activeSelect.dataset.name   = name;
+  activeSelect.dataset.avatar = avatar;
+
+  closeDropdown();
+});
+
+// Close when scrolling the panel
+document.querySelector('.panel').addEventListener('scroll', () => {
+  closeDropdown();
+  closeStatusMenu();
+});
+
+// ─────────────────────────────────────────
+// Status system
+// ─────────────────────────────────────────
+
+// Individual row statuses (shown in the per-person status button + section badges)
+const STATUS_NOT_STARTED_ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='none' stroke='%23e1dfdd' stroke-width='1'/%3E%3C/svg%3E";
+
+const STATUS = {
+  'not-started': {
+    label: 'Not Started',
+    icon:  STATUS_NOT_STARTED_ICON,
+    badgeBg: '#f2f1f0', badgeColor: '#64615c',
+  },
+  'in-progress': {
+    label: 'In Progress',
+    icon:  'https://www.figma.com/api/mcp/asset/000fa352-4b2c-4add-8563-9afa5919be0b',
+    badgeBg: '#e8f0fe', badgeColor: '#1967d4',
+  },
+  'completed': {
+    label: 'Completed',
+    icon:  'https://www.figma.com/api/mcp/asset/ede97c5f-1727-4d5c-9b4f-8bc973e7d1b0',
+    badgeBg: '#dcfce7', badgeColor: '#166534',
+  },
+  'blocked': {
+    label: 'Blocked',
+    icon:  'https://www.figma.com/api/mcp/asset/84703d32-51c9-4ef7-986a-e9ad52e77b26',
+    badgeBg: '#fee793', badgeColor: '#3a3118',
+  },
+};
+
+// Task-level statuses (shown in the Details → Status badge)
+const TASK_STATUS = {
+  'not-started':        { label: 'Not Started',        bg: '#f2f1f0', color: '#64615c' },
+  'preparing':          { label: 'Preparing',           bg: '#e8f0fe', color: '#1967d4' },
+  'ready-for-review':   { label: 'Ready for Review',    bg: '#f3e8ff', color: '#7c3aed' },
+  'reviewing':          { label: 'Reviewing',           bg: '#ede9fe', color: '#6d28d9' },
+  'blocked':            { label: 'Blocked',             bg: '#fee793', color: '#3a3118' },
+  'change-requested':   { label: 'Change Requested',    bg: '#ffd59a', color: '#402a13' },
+  'completed':          { label: 'Completed',           bg: '#dcfce7', color: '#166534' },
+};
+
+const statusMenu    = document.getElementById('status-menu');
+let activeStatusBtn = null;
+
+function openStatusMenu(btn) {
+  if (btn.disabled || btn.dataset.locked === 'true') return;
+  closeDropdown();
+  if (activeStatusBtn === btn) { closeStatusMenu(); return; }
+  if (activeStatusBtn) activeStatusBtn.classList.remove('active');
+
+  activeStatusBtn = btn;
+  btn.classList.add('active');
+  const current = btn.dataset.status;
+
+  statusMenu.innerHTML = Object.entries(STATUS).map(([key, s]) => `
+    <div class="status-opt${key === current ? ' current' : ''}" data-status="${key}">
+      <img src="${s.icon}" width="16" height="16" alt="${s.label}" />
+      <span>${s.label}</span>
+    </div>
+  `).join('');
+
+  const rect = btn.getBoundingClientRect();
+  statusMenu.style.top     = (rect.bottom + 4) + 'px';
+  statusMenu.style.left    = rect.left + 'px';
+  statusMenu.style.display = 'block';
+}
+
+function closeStatusMenu() {
+  if (activeStatusBtn) activeStatusBtn.classList.remove('active');
+  statusMenu.style.display = 'none';
+  activeStatusBtn = null;
+}
+
+statusMenu.addEventListener('click', e => {
+  const opt = e.target.closest('.status-opt');
+  if (!opt || !activeStatusBtn) return;
+  applyStatus(activeStatusBtn, opt.dataset.status);
+  closeStatusMenu();
+});
+
+function applyStatus(btn, key) {
+  const s = STATUS[key];
+  btn.dataset.status = key;
+  btn.querySelector('.status-icon').src = s.icon;
+  btn.querySelector('.status-icon').alt = s.label;
+  if (key !== 'blocked') {
+    delete btn.dataset.blockedReason;
+    removeInlineComment(btn);
+  }
+  updateAllBadges();
+  if (key === 'blocked') showInlineCommentInput(btn);
+}
+
+document.getElementById('view-state').addEventListener('click', e => {
+  const btn = e.target.closest('.status-btn');
+  if (btn) { e.stopPropagation(); openStatusMenu(btn); }
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#status-menu') && !e.target.closest('.status-btn')) closeStatusMenu();
+  if (!e.target.closest('#assignee-dropdown') && !e.target.closest('.assignee-select')) closeDropdown();
+});
+
+// ─────────────────────────────────────────
+// Inline blocked comment
+// ─────────────────────────────────────────
+
+function getRowEl(btn) {
+  // btn → left-side flex div → outer row div
+  return btn.parentElement?.parentElement;
+}
+
+function getPersonAvatar(btn) {
+  const inner = btn.parentElement;
+  const img   = inner?.querySelector('.avatar img');
+  return img ? img.src : '';
+}
+
+function getPersonName(btn) {
+  const inner = btn.parentElement;
+  const span  = inner?.querySelector('span[style*="color:#181716"]');
+  return span ? span.textContent.trim() : '';
+}
+
+function showInlineCommentInput(btn) {
+  const rowEl = getRowEl(btn);
+  if (!rowEl) return;
+  const existing = rowEl.nextElementSibling;
+  if (existing && existing.classList.contains('inline-comment-area')) return;
+
+  const area = document.createElement('div');
+  area.className = 'inline-comment-area';
+  area.innerHTML = `
+    <textarea class="inline-comment-textarea" placeholder="Leave a note to tell your team why you are blocked"></textarea>
+    <div class="inline-comment-actions">
+      <button class="inline-comment-cancel">Cancel</button>
+      <button class="inline-comment-submit">Submit</button>
+    </div>
+  `;
+  rowEl.insertAdjacentElement('afterend', area);
+  area.querySelector('.inline-comment-textarea').focus();
+
+  area.querySelector('.inline-comment-cancel').addEventListener('click', () => area.remove());
+  area.querySelector('.inline-comment-submit').addEventListener('click', () => submitInlineComment(btn, area));
+  area.querySelector('.inline-comment-textarea').addEventListener('keydown', e => {
+    if (e.key === 'Escape') area.remove();
+  });
+}
+
+function submitInlineComment(btn, area) {
+  const textarea = area.querySelector('.inline-comment-textarea');
+  const reason   = textarea.value.trim();
+  if (!reason) return;
+
+  btn.dataset.blockedReason = reason;
+  area.remove();
+  updateBlockedBanner();
+}
+
+function removeInlineComment(btn) {
+  const rowEl = getRowEl(btn);
+  if (!rowEl) return;
+  const next = rowEl.nextElementSibling;
+  if (next && next.classList.contains('inline-comment-area')) next.remove();
+}
+
+// ─────────────────────────────────────────
+// Blocked banner (top of details panel)
+// ─────────────────────────────────────────
+
+function updateBlockedBanner() {
+  const banner     = document.getElementById('blocked-banner');
+  const bannerText = document.getElementById('blocked-banner-text');
+  if (!banner) return;
+
+  const lines = [];
+
+  // Dependencies: any not completed
+  const depBadges = [...document.querySelectorAll('#view-dependencies-list .dep-status-badge')];
+  if (depBadges.some(b => b.dataset.status !== 'completed')) {
+    lines.push('Blocked due to tasks dependencies');
+  }
+
+  // Subtasks: any unchecked
+  const subtaskChecks = [...document.querySelectorAll('#view-subtasks-list .subtask-check')];
+  if (subtaskChecks.some(c => !c.classList.contains('checked'))) {
+    lines.push('Blocked due to sub-tasks');
+  }
+
+  // Preparer / reviewer notes
+  const blockedBtns = [...document.querySelectorAll(
+    '#view-preparers-list .status-btn, #view-reviewers-list .status-btn'
+  )].filter(b => b.dataset.status === 'blocked' && b.dataset.blockedReason);
+
+  blockedBtns.forEach(b => {
+    const role   = b.closest('#view-preparers-list') ? 'Preparer' : 'Reviewer';
+    const name   = getPersonName(b);
+    const reason = b.dataset.blockedReason;
+    lines.push(`${escHtml(name || role)} blocked: ${escHtml(reason)}`);
+  });
+
+  if (!lines.length) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  bannerText.innerHTML = lines.map(l => `<span>${l}</span>`).join('<br>');
+  banner.style.display = 'block';
+}
+
+// ─────────────────────────────────────────
+// Blocked tooltip on hover
+// ─────────────────────────────────────────
+const blockedTooltipEl   = document.getElementById('blocked-tooltip');
+const blockedTooltipBody = document.getElementById('blocked-tooltip-body');
+
+function showBlockedTooltip(anchorEl, lines) {
+  if (!lines.length) return;
+  blockedTooltipBody.innerHTML = lines.map(l => `<div style="white-space:nowrap">${escHtml(l)}</div>`).join('');
+  blockedTooltipEl.style.display = 'block';
+  // Measure, then position above the anchor
+  const rect = anchorEl.getBoundingClientRect();
+  const th   = blockedTooltipEl.offsetHeight;
+  let   left = rect.left;
+  const tw   = blockedTooltipEl.offsetWidth;
+  if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+  blockedTooltipEl.style.left = left + 'px';
+  blockedTooltipEl.style.top  = (rect.top - th - 4) + 'px';
+}
+
+function hideBlockedTooltip() {
+  blockedTooltipEl.style.display = 'none';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Collect "Blocked by [role]: Name" lines from a list of status buttons
+function getBlockedLines(btns) {
+  return btns
+    .filter(b => b.dataset.status === 'blocked')
+    .map(b => {
+      const role   = b.closest('#view-preparers-list') ? 'preparer' : 'reviewer';
+      const row    = b.closest('div[style]');
+      const nameEl = row ? row.querySelector('span[style*="color:#181716"]') : null;
+      const name   = nameEl ? nameEl.textContent.trim() : '';
+      return name ? `Blocked by ${role}: ${name}` : `Blocked by ${role}`;
+    });
+}
+
+// Tooltip hover via delegation on the whole document
+document.addEventListener('mouseover', e => {
+  const taskBadge = e.target.closest('#task-status-badge');
+  const prepBadge = e.target.closest('#view-preparers-badge');
+  const revBadge  = e.target.closest('#view-reviewers-badge');
+  const statusBtn = e.target.closest('.status-btn');
+
+  if (taskBadge && taskBadge.textContent.trim() === 'Blocked') {
+    const personBtns = [...document.querySelectorAll('#view-preparers-list .status-btn, #view-reviewers-list .status-btn')];
+    const lines = getBlockedLines(personBtns);
+    const blockedByDeps = [...document.querySelectorAll('#view-dependencies-list .dep-status-badge')].some(b => b.dataset.status !== 'completed');
+    if (blockedByDeps) lines.push('Blocked due to tasks dependencies');
+    const blockedBySubs = [...document.querySelectorAll('#view-subtasks-list .subtask-check')].some(c => !c.classList.contains('checked'));
+    if (blockedBySubs) lines.push('Blocked due to sub-tasks');
+    showBlockedTooltip(taskBadge, lines.length ? lines : ['Blocked']);
+  } else if (statusBtn && statusBtn.dataset.status === 'blocked') {
+    showBlockedTooltip(statusBtn, getBlockedLines([statusBtn]));
+  } else if (!e.target.closest('#blocked-tooltip')) {
+    hideBlockedTooltip();
+  }
+});
+
+// ─────────────────────────────────────────
+// Badge rollup
+// ─────────────────────────────────────────
+
+// Aggregate individual row statuses → section badge key
+function sectionAggregate(statuses) {
+  if (!statuses.length) return 'not-started';
+  if (statuses.every(s => s === 'not-started'))  return 'not-started';
+  if (statuses.some(s  => s === 'blocked'))       return 'blocked';
+  if (statuses.every(s => s === 'completed'))     return 'completed';
+  return 'in-progress';
+}
+
+// Derive task-level status from preparer + reviewer + dependency + subtask statuses
+function taskAggregate(prepStatuses, revStatuses, depStatuses, subtaskStatuses) {
+  const blockedByDeps = depStatuses.some(s => s !== 'completed');
+  const blockedBySubs = subtaskStatuses.some(s => s === 'not-completed');
+  const all = [...prepStatuses, ...revStatuses];
+  if (blockedByDeps || blockedBySubs || all.some(s => s === 'blocked')) return 'blocked';
+  const allPrepDone = prepStatuses.length > 0 && prepStatuses.every(s => s === 'completed');
+  const allRevDone  = revStatuses.length  > 0 && revStatuses.every(s  => s === 'completed');
+  if (allPrepDone && allRevDone)                                        return 'completed';
+  if (allPrepDone && revStatuses.some(s => s === 'in-progress'))        return 'reviewing';
+  if (allPrepDone)                                                      return 'ready-for-review';
+  if (prepStatuses.some(s => s === 'in-progress'))                      return 'preparing';
+  return 'not-started';
+}
+
+let wasChangeRequested = false;
+
+function resetAllAssigneeStatuses() {
+  document.querySelectorAll('#view-preparers-list .status-btn, #view-reviewers-list .status-btn').forEach(btn => {
+    btn.dataset.status = 'not-started';
+    delete btn.dataset.blockedReason;
+    const icon = btn.querySelector('.status-icon');
+    if (icon) { icon.src = STATUS['not-started'].icon; icon.alt = 'Not Started'; }
+  });
+}
+
+function updateAllBadges() {
+  const rnBadges  = [...document.querySelectorAll('#view-review-notes-list .rn-status-badge')];
+  const anyOpen   = rnBadges.some(b => b.dataset.status === 'open');
+
+  // Detect transition INTO Change Requested — reset all sign-offs once
+  if (anyOpen && !wasChangeRequested) {
+    resetAllAssigneeStatuses();
+    wasChangeRequested = true;
+  } else if (!anyOpen) {
+    wasChangeRequested = false;
+  }
+
+  const prepBtns      = [...document.querySelectorAll('#view-preparers-list .status-btn')];
+  const revBtns       = [...document.querySelectorAll('#view-reviewers-list .status-btn')];
+  const depBadges     = [...document.querySelectorAll('#view-dependencies-list .dep-status-badge')];
+  const subtaskChecks = [...document.querySelectorAll('#view-subtasks-list .subtask-check')];
+
+  const prepStatuses    = prepBtns.map(b      => b.dataset.status || 'not-started');
+  const revStatuses     = revBtns.map(b       => b.dataset.status || 'not-started');
+  const depStatuses     = depBadges.map(b     => b.dataset.status || 'not-started');
+  const subtaskStatuses = subtaskChecks.map(c => c.classList.contains('checked') ? 'completed' : 'not-completed');
+
+  // Section badges
+  applyStatusBadge('view-preparers-badge', sectionAggregate(prepStatuses));
+  applyStatusBadge('view-reviewers-badge', sectionAggregate(revStatuses));
+
+  // Task-level badge — Change Requested overrides everything
+  if (anyOpen) {
+    applyTaskBadge('task-status-badge', 'change-requested');
+    applyTaskBadge('edit-status-badge', 'change-requested');
+  } else {
+    const taskKey = taskAggregate(prepStatuses, revStatuses, depStatuses, subtaskStatuses);
+    applyTaskBadge('task-status-badge', taskKey);
+    applyTaskBadge('edit-status-badge', taskKey);
+  }
+
+  // Lock reviewer rows
+  const allPrepCompleted = prepStatuses.length > 0 && prepStatuses.every(s => s === 'completed');
+  revBtns.forEach(btn => setReviewerLock(btn, !allPrepCompleted));
+
+  // Update review notes counter
+  updateRnCounter();
+  // Update blocking reason banner
+  updateBlockedBanner();
+}
+
+function applyStatusBadge(id, key) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const s = STATUS[key];
+  let label = s.label;
+  if (key === 'in-progress') {
+    label = id === 'view-reviewers-badge' ? 'Reviewing' : 'Preparing';
+  }
+  el.textContent      = label;
+  el.style.background = s.badgeBg;
+  el.style.color      = s.badgeColor;
+}
+
+function applyTaskBadge(id, key) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const s = TASK_STATUS[key];
+  el.textContent      = s.label;
+  el.style.background = s.bg;
+  el.style.color      = s.color;
+}
+
+// Lock/unlock a reviewer status button
+function setReviewerLock(btn, lock) {
+  btn.dataset.locked = lock ? 'true' : 'false';
+  btn.style.opacity  = lock ? '0.35' : '1';
+  btn.style.cursor   = lock ? 'not-allowed' : 'pointer';
+  btn.title = lock ? 'Available after all preparers complete' : 'Set status';
+  if (lock) {
+    btn.dataset.status = 'not-started';
+    btn.querySelector('.status-icon').src = STATUS['not-started'].icon;
+    btn.querySelector('.status-icon').alt = 'Not Started';
+  }
+}
+
+// ─────────────────────────────────────────
+// Review Notes
+// ─────────────────────────────────────────
+const RN_STATUS = {
+  'open':             { label: 'Open',             bg: '#ffd59a', color: '#402a13' },
+  'ready-for-review': { label: 'Ready for Review',  bg: '#dcfce7', color: '#166534' },
+  'closed':           { label: 'Closed',            bg: '#f2f1f0', color: '#64615c' },
+};
+const RN_STATUS_KEYS = ['open', 'ready-for-review', 'closed'];
+
+function applyRnStatus(badge, key) {
+  const s = RN_STATUS[key];
+  badge.dataset.status  = key;
+  badge.textContent     = s.label;
+  badge.style.background = s.bg;
+  badge.style.color      = s.color;
+  updateAllBadges();
+}
+
+function updateRnCounter() {
+  const badges = [...document.querySelectorAll('#view-review-notes-list .rn-status-badge')];
+  const total  = badges.length;
+  const closed = badges.filter(b => b.dataset.status === 'closed').length;
+  const el = document.getElementById('rn-counter');
+  if (el) el.textContent = total ? `— ${closed}/${total}` : '';
+}
+
+// Cycle rn badge on click: Open → Ready for Review → Closed (stays at Closed)
+document.getElementById('view-review-notes-list').addEventListener('click', e => {
+  const badge = e.target.closest('.rn-status-badge');
+  if (!badge) return;
+  const idx  = RN_STATUS_KEYS.indexOf(badge.dataset.status);
+  const next = idx < RN_STATUS_KEYS.length - 1 ? RN_STATUS_KEYS[idx + 1] : RN_STATUS_KEYS[idx];
+  applyRnStatus(badge, next);
+});
+
+// "Add a Review Note" modal
+const rnModal    = document.getElementById('rn-modal');
+const rnContent  = document.getElementById('rn-content');
+const rnAssignee = document.getElementById('rn-assignee');
+
+document.getElementById('add-rn-btn').addEventListener('click', () => {
+  rnContent.value = '';
+  rnModal.style.display = 'flex';
+  setTimeout(() => rnContent.focus(), 0);
+});
+
+document.getElementById('rn-cancel').addEventListener('click', () => {
+  rnModal.style.display = 'none';
+});
+
+// Close on backdrop click
+rnModal.addEventListener('click', e => {
+  if (e.target === rnModal) rnModal.style.display = 'none';
+});
+
+document.getElementById('rn-save').addEventListener('click', () => {
+  const sel    = rnAssignee.options[rnAssignee.selectedIndex];
+  const name   = sel.text;
+  const avatar = sel.dataset.avatar;
+
+  const list = document.getElementById('view-review-notes-list');
+  const row  = document.createElement('div');
+  row.className = 'rn-row';
+  row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:4px 0;';
+  row.innerHTML = `
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="avatar"><img src="${avatar}" alt="${escHtml(name)}" /></div>
+      <span style="font-size:13px; color:#181716;">${escHtml(name)}</span>
+    </div>
+    <button class="rn-status-badge" data-status="open"
+      style="background:#ffd59a;color:#402a13;border:none;border-radius:9999px;padding:2px 8px;font-size:10px;line-height:16px;cursor:pointer;white-space:nowrap;font-family:inherit;">
+      Open
+    </button>
+  `;
+  list.appendChild(row);
+  rnModal.style.display = 'none';
+  updateAllBadges(); // triggers Change Requested + reset
+});
+
+// Initialize badges and reviewer lock on page load
+updateAllBadges();
+
+// ─────────────────────────────────────────
+// Dependency status cycling
+// ─────────────────────────────────────────
+const DEP_STATUS = {
+  'not-started': { label: 'Not Started', bg: '#f2f1f0', color: '#181716' },
+  'in-progress': { label: 'In Progress', bg: '#e8f0fe', color: '#1967d4' },
+  'completed':   { label: 'Completed',   bg: '#dcfce7', color: '#166534' },
+};
+const DEP_STATUS_KEYS = Object.keys(DEP_STATUS);
+
+function applyDepStatus(badge, key) {
+  const s = DEP_STATUS[key];
+  badge.dataset.status  = key;
+  badge.textContent     = s.label;
+  badge.style.background = s.bg;
+  badge.style.color      = s.color;
+  updateAllBadges();
+}
+
+// Cycle dep badge status on click
+document.getElementById('view-dependencies-list').addEventListener('click', e => {
+  const badge = e.target.closest('.dep-status-badge');
+  if (!badge) return;
+  const next = DEP_STATUS_KEYS[(DEP_STATUS_KEYS.indexOf(badge.dataset.status) + 1) % DEP_STATUS_KEYS.length];
+  applyDepStatus(badge, next);
+});
+
+// Add dependency inline
+document.getElementById('add-dep-btn').addEventListener('click', () => {
+  const list = document.getElementById('view-dependencies-list');
+  // Prevent duplicate inputs
+  if (list.querySelector('.dep-input')) return;
+
+  const row = document.createElement('div');
+  row.className = 'dep-row';
+  row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:4px 0; gap:8px;';
+  row.innerHTML = `
+    <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+      <img src="https://www.figma.com/api/mcp/asset/1c240905-6994-4124-948e-62b1571098df" width="16" height="16" alt="" style="flex-shrink:0; opacity:0.45;" />
+      <input type="text" class="dep-input" placeholder="Dependency task name"
+        style="font-size:13px; color:#181716; border:none; border-bottom:1px solid #e1dfdd; outline:none; flex:1; padding:2px 0; background:transparent; font-family:inherit;" />
+    </div>
+    <span style="font-size:10px; color:#aba7a2; white-space:nowrap; padding:0 8px;">Not Started</span>
+  `;
+  list.appendChild(row);
+
+  const input = row.querySelector('.dep-input');
+  input.focus();
+
+  function confirmDep() {
+    const name = input.value.trim();
+    if (!name) { row.remove(); return; }
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+        <img src="https://www.figma.com/api/mcp/asset/1c240905-6994-4124-948e-62b1571098df" width="16" height="16" alt="" style="flex-shrink:0; opacity:0.45;" />
+        <span class="dep-name" style="font-size:13px; color:#181716; flex:1;">${escHtml(name)}</span>
+      </div>
+      <button class="dep-status-badge" data-status="not-started"
+        style="background:#f2f1f0;color:#181716;border:none;border-radius:9999px;padding:2px 8px;font-size:10px;line-height:16px;cursor:pointer;white-space:nowrap;font-family:inherit;">
+        Not Started
+      </button>
+    `;
+    updateAllBadges();
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirmDep(); }
+    if (e.key === 'Escape') row.remove();
+  });
+  input.addEventListener('blur', confirmDep);
+});
+
+// ─────────────────────────────────────────
+// Subtask checkboxes + counter
+// ─────────────────────────────────────────
+function updateSubtaskCounter() {
+  const checks = [...document.querySelectorAll('#view-subtasks-list .subtask-check')];
+  const done  = checks.filter(c => c.classList.contains('checked')).length;
+  const el    = document.getElementById('subtask-counter');
+  if (el) el.textContent = checks.length ? `${done}/${checks.length}` : '';
+}
+
+document.getElementById('view-subtasks-list').addEventListener('click', e => {
+  const check = e.target.closest('.subtask-check');
+  if (!check) return;
+  check.classList.toggle('checked');
+  // show/hide checkmark SVG inside
+  if (check.classList.contains('checked')) {
+    if (!check.querySelector('svg')) {
+      check.innerHTML = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M2 5l2.5 2.5 3.5-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+    }
+  } else {
+    check.innerHTML = '';
+  }
+  updateSubtaskCounter();
+  updateAllBadges();
+});
+
+document.getElementById('add-subtask-btn').addEventListener('click', () => {
+  const list = document.getElementById('view-subtasks-list');
+  if (list.querySelector('.subtask-input')) return;
+
+  const row = document.createElement('div');
+  row.className = 'subtask-row';
+  row.style.cssText = 'display:flex; align-items:center; gap:8px; padding:4px 0;';
+  row.innerHTML = `
+    <div class="checkbox-cell subtask-check" style="flex-shrink:0; opacity:0.4;"></div>
+    <input type="text" class="subtask-input" placeholder="Subtask name"
+      style="font-size:13px; color:#181716; border:none; border-bottom:1px solid #e1dfdd; outline:none; flex:1; padding:2px 0; background:transparent; font-family:inherit;" />
+  `;
+  list.appendChild(row);
+
+  const input = row.querySelector('.subtask-input');
+  input.focus();
+
+  function confirmSubtask() {
+    const name = input.value.trim();
+    if (!name) { row.remove(); updateSubtaskCounter(); return; }
+    row.innerHTML = `
+      <div class="checkbox-cell subtask-check" style="flex-shrink:0;"></div>
+      <span style="font-size:13px; color:#181716; flex:1;">${escHtml(name)}</span>
+    `;
+    updateSubtaskCounter();
+    updateAllBadges();
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); confirmSubtask(); }
+    if (e.key === 'Escape') { row.remove(); updateSubtaskCounter(); }
+  });
+  input.addEventListener('blur', confirmSubtask);
+});
+
+// initialise counter
+updateSubtaskCounter();
+
+// ─────────────────────────────────────────
+// Scenario-driven initialization
+// ─────────────────────────────────────────
+const SCENARIOS = {
+  'not-started': {
+    title: 'Cash Transactions Posted to NBKC 3242',
+    project: 'Cash Management', entity: 'Parent Company (Consolidated)',
+    tags: ['#journal_entry'], description: 'Post all cash transactions for NBKC account 3242 for the period.',
+    hasAgentMax: true,
+    preparers: [
+      { name: 'Avery Jefferson', init: 'AJ', bg: '#dbeafe', col: '#1e40af', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'not-started', due: 'Aug 7' },
+      { name: 'Anna Harrison',   init: 'AH', bg: '#d1fae5', col: '#065f46', img: 'https://www.figma.com/api/mcp/asset/d5c5f6d1-8006-49e7-9cad-e2f78916dc92', status: 'not-started', due: 'Aug 7' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 7' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'preparing': {
+    title: 'Cash Transactions Posted to SVB 8392',
+    project: 'Cash Management', entity: 'Parent Company (Consolidated)',
+    tags: ['#journal_entry'], description: 'Post all cash transactions for SVB account 8392.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Avery Jefferson', init: 'AJ', bg: '#dbeafe', col: '#1e40af', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'in-progress', due: 'Aug 6' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 6' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'blocked-preparer': {
+    title: 'Cash Transactions Posted to JPM 4382',
+    project: 'Cash Management', entity: 'Parent Company (Consolidated)',
+    tags: ['#journal_entry'], description: 'Post all cash transactions for JPM account 4382.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Anna Harrison', init: 'AH', bg: '#d1fae5', col: '#065f46', img: 'https://www.figma.com/api/mcp/asset/d5c5f6d1-8006-49e7-9cad-e2f78916dc92', status: 'blocked', due: 'Aug 6', blockedReason: 'Waiting for bank confirmation from JPM — reaching out to treasury' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 6' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'blocked-deps': {
+    title: 'Customer Deposit Reconciliation',
+    project: 'Accounts Receivable', entity: 'Parent Company (Consolidated)',
+    tags: ['#balance_recon'], description: 'Reconcile customer deposit accounts against the subsidiary ledger.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Olivia Rhye', init: 'OR', bg: '#fae8ff', col: '#86198f', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 9' },
+    ],
+    reviewers: [
+      { name: 'Annie Thuener', init: 'AT', bg: '#fef3c7', col: '#92400e', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'not-started', due: 'Aug 11' },
+    ],
+    deps: [{ name: 'AR Aging Report Review', status: 'in-progress' }],
+    subtasks: [],
+  },
+  'blocked-subtask': {
+    title: 'Deferred Revenue Recognition',
+    project: 'Lease Accounting', entity: 'Parent Company (Consolidated)',
+    tags: ['#revenue'], description: 'Recognize deferred revenue per contract milestones reached this period.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Olivia Rhye', init: 'OR', bg: '#fae8ff', col: '#86198f', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 9' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'not-started', due: 'Aug 11' },
+    ],
+    deps: [],
+    subtasks: [
+      { name: 'Pull contract milestone report from CRM', checked: false },
+      { name: 'Match milestones to deferred revenue schedule', checked: false },
+      { name: 'Validate prior month carry-forward balance', checked: true },
+    ],
+  },
+  'ready-for-review': {
+    title: 'Commission & Bonus Accrual',
+    project: 'Accounts Payable', entity: 'Parent Company (Consolidated)',
+    tags: ['#journal_entry'], description: 'Accrue commissions and bonuses based on Q3 performance data from sales ops.',
+    hasAgentMax: true,
+    preparers: [
+      { name: 'Michael Hayes', init: 'MH', bg: '#e0e7ff', col: '#4338ca', img: 'https://www.figma.com/api/mcp/asset/3d098e55-ff64-43d1-b2a2-44a2de6e1cc7', status: 'completed', due: 'Jul 29' },
+    ],
+    reviewers: [
+      { name: 'Annie Thuener', init: 'AT', bg: '#fef3c7', col: '#92400e', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'not-started', due: 'Aug 1' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'reviewing': {
+    title: 'End of Month Cash Balance',
+    project: 'Cash Management', entity: 'Parent Company (Consolidated)',
+    tags: ['#balance_recon'], description: 'Download bank statement for period.\nCash coding.\nUpload JE to NetSuite for review.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Avery Jefferson', init: 'AJ', bg: '#dbeafe', col: '#1e40af', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'completed', due: 'Aug 2' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'in-progress', due: 'Aug 4' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'completed': {
+    title: 'Cash Reconciliation',
+    project: 'Cash Management', entity: 'Parent Company (Consolidated)',
+    tags: ['#balance_recon'], description: 'Verify all cash accounts match bank statements at period end.',
+    hasAgentMax: false,
+    preparers: [
+      { name: 'Anna Harrison', init: 'AH', bg: '#d1fae5', col: '#065f46', img: 'https://www.figma.com/api/mcp/asset/d5c5f6d1-8006-49e7-9cad-e2f78916dc92', status: 'completed', due: 'Aug 3' },
+    ],
+    reviewers: [
+      { name: 'Henry Maxson', init: 'HM', bg: '#fce7f3', col: '#9d174d', img: 'https://www.figma.com/api/mcp/asset/bf7b8925-a8ae-4ad7-b245-2f4e150039cf', status: 'completed', due: 'Aug 5' },
+    ],
+    deps: [], subtasks: [],
+  },
+  'agent-max': {
+    title: 'Post Interest Transactions Manually in Investment Account',
+    project: 'Accounts Payable', entity: 'Parent Company (Consolidated)',
+    tags: ['#balance_recon'], description: 'Post monthly interest income and expense entries for all investment accounts.',
+    hasAgentMax: true,
+    preparers: [
+      { name: 'Michael Hayes', init: 'MH', bg: '#e0e7ff', col: '#4338ca', img: 'https://www.figma.com/api/mcp/asset/3d098e55-ff64-43d1-b2a2-44a2de6e1cc7', status: 'completed', due: 'Jul 30' },
+    ],
+    reviewers: [
+      { name: 'Annie Thuener', init: 'AT', bg: '#fef3c7', col: '#92400e', img: 'https://www.figma.com/api/mcp/asset/1ebdf9e6-fd37-4c73-a720-f4551a35c334', status: 'in-progress', due: 'Aug 2' },
+    ],
+    deps: [], subtasks: [],
+  },
+};
+
+const STATUS_BTN_STYLE = 'width:32px;height:32px;padding:8px;border:none;background:transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+
+function renderPersonRow(p, isLocked) {
+  const s = STATUS[p.status] || STATUS['not-started'];
+  const lockedAttr = isLocked ? ' data-locked="true" disabled' : '';
+  const lockTitle  = isLocked ? 'Available after all preparers complete' : 'Set status';
+  return `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="status-btn" data-status="${p.status}"${p.blockedReason ? ` data-blocked-reason="${p.blockedReason.replace(/"/g, '&quot;')}"` : ''} title="${lockTitle}" style="${STATUS_BTN_STYLE}"${lockedAttr}>
+          <img class="status-icon" src="${s.icon}" width="16" height="16" alt="${s.label}" />
+        </button>
+        ${p.img
+          ? `<div style="width:24px;height:24px;border-radius:9999px;overflow:hidden;flex-shrink:0;border:0.5px solid rgba(0,0,0,0.12);"><img src="${p.img}" width="24" height="24" style="width:100%;height:100%;object-fit:cover;display:block;" /></div>`
+          : `<div class="av-init" style="background:${p.bg};color:${p.col};">${p.init}</div>`}
+        <span style="font-size:13px; color:#181716;">${p.name}</span>
+      </div>
+      <span style="font-size:13px; color:#64615c;">Due: ${p.due}</span>
+    </div>`;
+}
+
+function applyScenario(key) {
+  const sc = SCENARIOS[key] || SCENARIOS['not-started'];
+
+  // Title
+  const titleEl = document.querySelector('#view-state > div > p');
+  if (titleEl) titleEl.textContent = sc.title;
+
+  // Tags
+  const tagsEl = document.getElementById('view-tags');
+  if (tagsEl && sc.tags) {
+    const allTags = sc.hasAgentMax ? [...sc.tags, '#max-agent'] : sc.tags;
+    tagsEl.innerHTML = allTags.map(t => `<span class="tag">${t}</span>`).join('');
+  }
+
+  // Description
+  const descEl = document.getElementById('view-description-text');
+  if (descEl && sc.description) descEl.innerHTML = sc.description.split('\n').map(l => `<span style="display:block">${l}</span>`).join('');
+
+  // Entity / Project
+  const entityEl = document.getElementById('view-entity-val');
+  if (entityEl && sc.entity) entityEl.textContent = sc.entity;
+  const projectEl = document.getElementById('view-project-val');
+  if (projectEl && sc.project) projectEl.textContent = sc.project;
+
+  // Preparers list
+  const prepList  = document.getElementById('view-preparers-list');
+  const maxRow    = document.getElementById('max-agent-row');
+  // Remove existing human rows (keep max-agent-row)
+  [...prepList.children].forEach(c => { if (c !== maxRow) c.remove(); });
+  // Insert new rows before max-agent-row
+  sc.preparers.forEach(p => {
+    const div = document.createElement('div');
+    div.innerHTML = renderPersonRow(p, false);
+    prepList.insertBefore(div.firstElementChild, maxRow);
+  });
+  // Show/hide agent max row based on scenario
+  if (maxRow) {
+    maxRow.style.display = sc.hasAgentMax ? 'flex' : 'none';
+    if (sc.hasAgentMax) {
+      maxStateIdx = 3;
+      applyMaxState(3);
+    }
+  }
+
+  // Reviewers list
+  const revList = document.getElementById('view-reviewers-list');
+  const allPrepDone = sc.preparers.every(p => p.status === 'completed');
+  revList.innerHTML = sc.reviewers.map(r => renderPersonRow(r, !allPrepDone)).join('');
+
+  // Dependencies list
+  const depList = document.getElementById('view-dependencies-list');
+  depList.innerHTML = sc.deps.map(dep => {
+    const ds = DEP_STATUS[dep.status] || DEP_STATUS['not-started'];
+    return `
+      <div class="dep-row" style="display:flex; align-items:center; justify-content:space-between; padding:2px 0;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:0;">
+          <img src="https://www.figma.com/api/mcp/asset/1c240905-6994-4124-948e-62b1571098df" width="16" height="16" alt="" style="flex-shrink:0; opacity:0.45;" />
+          <span class="dep-name" style="font-size:13px; color:#181716; flex:1;">${dep.name}</span>
+        </div>
+        <button class="dep-status-badge" data-status="${dep.status}"
+          style="background:${ds.bg};color:${ds.color};border:none;border-radius:9999px;padding:2px 8px;font-size:10px;line-height:16px;cursor:pointer;white-space:nowrap;font-family:inherit;">
+          ${ds.label}
+        </button>
+      </div>`;
+  }).join('');
+
+  // Subtasks list
+  const subList = document.getElementById('view-subtasks-list');
+  subList.innerHTML = sc.subtasks.map(sub => {
+    const checkSvg = sub.checked
+      ? `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5 3.5-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+      : '';
+    return `
+      <div class="subtask-row" style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+        <div class="checkbox-cell subtask-check${sub.checked ? ' checked' : ''}" style="flex-shrink:0;">${checkSvg}</div>
+        <span style="font-size:13px; color:#181716; flex:1;">${sub.name}</span>
+      </div>`;
+  }).join('');
+
+  updateSubtaskCounter();
+  updateAllBadges();
+
+  // Show inline comment for any already-blocked preparer
+  prepList.querySelectorAll('.status-btn[data-status="blocked"][data-blocked-reason]').forEach(btn => {
+    const reason = btn.dataset.blockedReason;
+    if (!reason) return;
+    const rowEl = btn.closest('div[style]');
+    if (!rowEl || rowEl.nextElementSibling?.classList.contains('inline-comment-area')) return;
+    const area = document.createElement('div');
+    area.className = 'inline-comment-area';
+    area.innerHTML = `
+      <div style="font-size:13px; line-height:20px; color:#64615c; padding:4px 0 0 40px;">${reason}</div>`;
+    rowEl.insertAdjacentElement('afterend', area);
+  });
+}
+
+// ─────────────────────────────────────────
+// Max Agent state cycling
+// ─────────────────────────────────────────
+const MAX_STATES = [
+  {
+    key: 'running',
+    icon: 'https://www.figma.com/api/mcp/asset/2c249358-41de-44cc-a2f5-927fd069bf80',
+    alt: 'Running',
+    right: '',
+  },
+  {
+    key: 'blocked',
+    icon: 'https://www.figma.com/api/mcp/asset/63549586-de6c-4206-8980-c619d0f7cea0',
+    alt: 'Blocked',
+    right: '',
+  },
+  {
+    key: 'completed',
+    icon: 'https://www.figma.com/api/mcp/asset/100a0c6a-f124-48eb-bac4-a6397253890a',
+    alt: 'Completed',
+    right: '',
+  },
+  {
+    key: 'ready',
+    icon: null, // radio circle — rendered as a CSS ring
+    alt: 'Ready to Run',
+    right: `<button class="max-run-btn"><img src="https://www.figma.com/api/mcp/asset/e504c06d-ae11-4e64-b2e3-b2c024e56397" width="12" height="12" alt="send" style="display:block;" />Run</button>`,
+  },
+];
+let maxStateIdx = 3; // default: ready/Run state (Figma 2788-81011)
+
+function applyMaxState(idx) {
+  const s = MAX_STATES[idx];
+  const imgEl = document.getElementById('max-state-img');
+  const rightEl = document.getElementById('max-right-area');
+  const btn = document.getElementById('max-state-btn');
+  if (!imgEl || !rightEl || !btn) return;
+
+  if (s.icon) {
+    imgEl.src = s.icon;
+    imgEl.alt = s.alt;
+    imgEl.style.display = 'block';
+    btn.style.cssText = '';
+  } else {
+    // "ready" state — show a plain radio circle instead of an icon
+    imgEl.style.display = 'none';
+    btn.style.cssText = 'width:32px;height:32px;padding:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;background:transparent;cursor:pointer;border-radius:6px;';
+    // draw a circle ring inline
+    if (!btn.querySelector('.max-radio')) {
+      const ring = document.createElement('div');
+      ring.className = 'max-radio';
+      ring.style.cssText = 'width:16px;height:16px;border-radius:9999px;border:1px solid #e1dfdd;flex-shrink:0;';
+      btn.appendChild(ring);
+    }
+  }
+  // hide/show radio ring
+  const ring = btn.querySelector('.max-radio');
+  if (ring) ring.style.display = s.icon ? 'none' : 'block';
+
+  rightEl.innerHTML = s.right;
+}
+
+const maxStateBtn = document.getElementById('max-state-btn');
+if (maxStateBtn) {
+  applyMaxState(maxStateIdx);
+  maxStateBtn.addEventListener('click', () => {
+    maxStateIdx = (maxStateIdx + 1) % MAX_STATES.length;
+    applyMaxState(maxStateIdx);
+  });
+}
+
+// ─────────────────────────────────────────
+// Max Agent model dropdown
+// ─────────────────────────────────────────
+const modelDropdown = document.getElementById('model-dropdown');
+const maxAutoBtn    = document.getElementById('max-auto-btn');
+const maxModelLabel = document.getElementById('max-model-label');
+
+function openModelDropdown() {
+  const rect = maxAutoBtn.getBoundingClientRect();
+  modelDropdown.style.top  = (rect.bottom + 4) + 'px';
+  modelDropdown.style.left = rect.left + 'px';
+  modelDropdown.classList.add('open');
+}
+function closeModelDropdown() {
+  modelDropdown.classList.remove('open');
+}
+
+if (maxAutoBtn) {
+  maxAutoBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (modelDropdown.classList.contains('open')) {
+      closeModelDropdown();
+    } else {
+      openModelDropdown();
+    }
+  });
+}
+
+if (modelDropdown) {
+  modelDropdown.addEventListener('click', e => {
+    const option = e.target.closest('.model-option');
+    if (!option) return;
+    const model = option.dataset.model;
+    // update selected state
+    modelDropdown.querySelectorAll('.model-option').forEach(o => o.classList.toggle('selected', o === option));
+    // update button label
+    if (maxModelLabel) maxModelLabel.textContent = model;
+    closeModelDropdown();
+  });
+}
+
+// close model dropdown on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#model-dropdown') && !e.target.closest('#max-auto-btn')) {
+    closeModelDropdown();
+  }
+});
+
+// Drawer-embed mode: when loaded as ?mode=drawer inside the dashboard
+if (new URLSearchParams(location.search).get('mode') === 'drawer') {
+  document.documentElement.style.height = '100%';
+  document.body.style.cssText = 'margin:0;padding:0;background:white;height:100vh;display:flex;flex-direction:column;overflow:hidden;';
+  const panel = document.querySelector('.panel');
+  if (panel) {
+    panel.style.cssText = 'width:100%;height:100vh;border:none;border-radius:0;display:flex;flex-direction:column;overflow:hidden;';
+  }
+  // Make each state panel scrollable within the fixed iframe height
+  const viewState = document.getElementById('view-state');
+  if (viewState) viewState.style.cssText = 'flex:1;overflow-y:auto;min-height:0;';
+  const editState = document.getElementById('edit-state');
+  if (editState) editState.style.cssText = 'flex:1;overflow-y:auto;min-height:0;';
+}
+
+// Apply scenario from URL param
+(function() {
+  const sc = new URLSearchParams(location.search).get('scenario') || 'not-started';
+  if (SCENARIOS[sc]) applyScenario(sc);
+})();
+</script>
+
+</body>
+</html>

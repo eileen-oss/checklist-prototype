@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+    html, body { height: 100%; overflow: hidden; background: #fff; color: #181716; font-size: 13px; }
+
+    body { display: flex; }
+
+    /* ── Sidebar ─────────────────────────────── */
+    #sidebar {
+      width: 56px; flex-shrink: 0;
+      background: #fff;
+      border-right: 0.7px solid #f2f1f0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0; gap: 0; z-index: 10; height: 100vh;
+    }
+    .sidebar-logo {
+      width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+      border-bottom: 0.7px solid #f2f1f0; flex-shrink: 0;
+    }
+    .sidebar-nav { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 2px; overflow: hidden; }
+    .nav-icon {
+      width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #9b978f; transition: background 0.12s, color 0.12s;
+    }
+    .nav-icon:hover { background: #f2f1f0; color: #64615c; }
+    .nav-icon.active { background: #f2f1f0; color: #181716; }
+    .nav-divider { width: 28px; height: 0.5px; background: #f2f1f0; margin: 4px 0; flex-shrink: 0; }
+    .sidebar-avatar { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; border-top: 0.7px solid #f2f1f0; flex-shrink: 0; }
+    .av-circle { width: 32px; height: 32px; border-radius: 9999px; background: #fde68a; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #92400e; }
+
+    /* ── Main area ───────────────────────────── */
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+    /* ── Top bar ─────────────────────────────── */
+    #topbar {
+      height: 56px; flex-shrink: 0;
+      border-bottom: 0.7px solid #f2f1f0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; gap: 12px;
+    }
+    #topbar-title { font-size: 18px; font-weight: 600; color: #181716; line-height: 1; }
+    #topbar-right { display: flex; align-items: center; gap: 8px; }
+    .org-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 8px; border-radius: 8px; cursor: pointer;
+      border: none; background: none; font-size: 12px; color: #181716; font-weight: 500;
+    }
+    .org-btn:hover { background: #f2f1f0; }
+    .org-dot { width: 18px; height: 18px; border-radius: 9999px; background: #1967d4; display: flex; align-items: center; justify-content: center; }
+    .locked-pill {
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 8px; border-radius: 9999px; border: 0.7px solid #e1dfdd;
+      font-size: 11px; color: #64615c; cursor: pointer; background: white;
+    }
+    .locked-pill:hover { background: #f8f7f6; }
+    .toggle-track {
+      width: 28px; height: 16px; border-radius: 9999px; background: #d1cdc7;
+      position: relative; transition: background 0.2s;
+    }
+    .toggle-knob {
+      width: 12px; height: 12px; border-radius: 9999px; background: white;
+      position: absolute; top: 2px; left: 2px; transition: left 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    .date-nav { display: flex; align-items: center; gap: 4px; }
+    .date-btn {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; cursor: pointer; border: none; background: none; color: #64615c;
+    }
+    .date-btn:hover { background: #f2f1f0; }
+    .date-chip {
+      display: flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 6px; border: 0.7px solid #e1dfdd;
+      font-size: 12px; color: #181716; cursor: pointer; background: white;
+    }
+    .date-chip:hover { background: #f8f7f6; }
+    .topbar-av { width: 28px; height: 28px; border-radius: 9999px; background: #a78bfa; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: white; cursor: pointer; }
+
+    /* ── Tab bar ─────────────────────────────── */
+    #tabbar {
+      height: 40px; flex-shrink: 0;
+      border-bottom: 0.7px solid #f2f1f0;
+      display: flex; align-items: flex-end; padding: 0 20px; gap: 16px;
+    }
+    .tab-item {
+      padding: 8px 2px; font-size: 12px; color: #9b978f; cursor: pointer;
+      border: none; background: none; border-bottom: 1.5px solid transparent; margin-bottom: -0.7px;
+      line-height: 1; white-space: nowrap;
+    }
+    .tab-item:hover { color: #64615c; }
+    .tab-item.active { color: #181716; font-weight: 500; border-bottom-color: #181716; }
+
+    /* ── Toolbar ─────────────────────────────── */
+    #toolbar {
+      flex-shrink: 0;
+      border-bottom: 0.7px solid #f2f1f0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    #toolbar-left { display: flex; align-items: center; gap: 0; }
+    .view-tab {
+      height: 32px; padding: 6px 8px; border-radius: 8px; font-size: 12px;
+      color: #0b0a06; cursor: pointer; border: none; background: #f8f7f6;
+      white-space: nowrap; line-height: 20px;
+    }
+    .view-tab:hover { background: #eeedec; }
+    .view-tab-add {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; cursor: pointer; border: none; background: white;
+    }
+    .view-tab-add:hover { background: #f2f1f0; }
+    #toolbar-right { display: flex; align-items: center; gap: 12px; }
+    .col-sort-group {
+      display: flex; align-items: center;
+      border: 0.5px solid #e1dfdd; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    }
+    .col-sort-btn {
+      height: 32px; padding: 0 8px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: white;
+    }
+    .col-sort-btn:first-child { background: #f2f0f0; border-right: 0.5px solid #e1dfdd; border-radius: 8px 0 0 8px; }
+    .col-sort-btn:hover { background: #eeedec; }
+    .search-box {
+      display: flex; align-items: center; gap: 8px; width: 256px;
+      border: 0.5px solid #e1dfdd; border-radius: 8px; padding: 6px 8px;
+      height: 32px; background: white; cursor: text; flex-shrink: 0;
+    }
+    .search-box:hover { border-color: #d1cdc7; }
+    .search-box span { font-size: 12px; color: #716f6c; line-height: 19px; }
+    .filter-btn {
+      display: flex; align-items: center; gap: 4px; padding: 8px;
+      border: 0.5px solid #e1dfdd; border-radius: 8px; height: 32px;
+      cursor: pointer; background: white; white-space: nowrap; flex-shrink: 0;
+    }
+    .filter-btn:hover { background: #f8f7f6; }
+    .filter-btn span { font-size: 12px; color: #4d4a46; line-height: 18px; padding: 0 2px; }
+    .create-btn {
+      display: flex; align-items: center; gap: 4px; padding: 8px;
+      background: #1967d4; border-radius: 8px; height: 32px;
+      border: none; cursor: pointer; flex-shrink: 0;
+    }
+    .create-btn:hover { background: #1558b0; }
+    .create-btn span { font-size: 12px; color: white; line-height: 18px; padding: 0 2px; }
+    .more-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border: 0.5px solid #e1dfdd; border-radius: 8px; cursor: pointer; background: white; flex-shrink: 0;
+    }
+    .more-btn:hover { background: #f8f7f6; }
+
+    /* ── Table ───────────────────────────────── */
+    #table-area { flex: 1; overflow-y: auto; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+
+    /* Column headers */
+    thead tr { border-bottom: 0.7px solid #f2f1f0; }
+    th {
+      padding: 0 12px; height: 36px; text-align: left;
+      font-size: 11px; font-weight: 500; color: #9b978f;
+      white-space: nowrap; user-select: none;
+      position: sticky; top: 0; background: white; z-index: 5;
+      border-bottom: 0.7px solid #f2f1f0;
+    }
+    th:first-child { padding-left: 20px; }
+    th:last-child { padding-right: 20px; }
+    th .th-inner { display: flex; align-items: center; gap: 3px; cursor: pointer; }
+    th .th-inner:hover { color: #64615c; }
+
+    /* Section rows */
+    .section-row { cursor: pointer; }
+    .section-row td {
+      padding: 0; height: 36px;
+      border-bottom: 0.7px solid #f2f1f0;
+      background: #fff;
+    }
+    .section-row:hover td { background: #fafaf9; }
+    .section-cell {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 20px; height: 36px;
+    }
+    .section-chevron { color: #9b978f; display: flex; align-items: center; transition: transform 0.15s; }
+    .section-chevron.collapsed { transform: rotate(-90deg); }
+    .section-name { font-size: 11px; font-weight: 600; color: #64615c; letter-spacing: 0.02em; }
+    .section-count { font-size: 11px; color: #aba7a2; }
+    .completed-badge {
+      padding: 1px 6px; border-radius: 9999px; font-size: 10px; font-weight: 500;
+      background: #dcfce7; color: #166534;
+    }
+
+    /* Task rows */
+    .task-row { cursor: pointer; }
+    .task-row td {
+      padding: 0 12px; height: 44px;
+      border-bottom: 0.7px solid #f2f1f0;
+      vertical-align: middle; background: white;
+    }
+    .task-row td:first-child { padding-left: 20px; }
+    .task-row td:last-child { padding-right: 20px; }
+    .task-row:hover td { background: #fafaf9; }
+    .task-row.selected td { background: #eff6ff !important; }
+
+    /* Task name cell */
+    .task-name-cell { display: flex; align-items: center; gap: 8px; }
+    .task-indent { width: 20px; flex-shrink: 0; }
+    .task-name { font-size: 13px; color: #181716; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 360px; }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* Person cell */
+    .person-cell { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .av-init {
+      width: 20px; height: 20px; border-radius: 9999px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 600; flex-shrink: 0;
+    }
+    .person-name { font-size: 12px; color: #181716; }
+
+    /* Date cell */
+    .date-cell { font-size: 12px; color: #64615c; white-space: nowrap; }
+
+    /* Tag cell */
+    .tags-cell { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+    .tag-chip {
+      padding: 2px 6px; border-radius: 6px; font-size: 10px;
+      background: #f2f1f0; color: #64615c; white-space: nowrap;
+    }
+
+    /* ── Drawer ──────────────────────────────── */
+    #drawer {
+      position: fixed; top: 0; right: 0; width: 480px; height: 100vh;
+      background: white;
+      border-left: 0.7px solid #e1dfdd;
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 40;
+      overflow: hidden;
+    }
+    #drawer.open { transform: translateX(0); }
+    #drawer iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ── Overlay ─────────────────────────────── */
+    #overlay {
+      position: fixed; inset: 0; z-index: 39;
+      display: none;
+    }
+    #overlay.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ────────────────────────────────── -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <!-- Maxima logo mark -->
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M4 20L12 4L20 20H4Z" fill="#1967d4" opacity="0.15"/>
+      <path d="M12 4L20 20H4L12 4Z" stroke="#1967d4" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M8 15L12 8L16 15" stroke="#1967d4" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <div class="sidebar-nav">
+    <!-- Briefcase -->
+    <div class="nav-icon" title="Portfolio">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+      </svg>
+    </div>
+    <!-- Lightning -->
+    <div class="nav-icon" title="Automation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+      </svg>
+    </div>
+    <div class="nav-divider"></div>
+    <!-- Bar chart -->
+    <div class="nav-icon" title="Reports">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 20V10M12 20V4M6 20v-6"/>
+      </svg>
+    </div>
+    <!-- Checklist (active) -->
+    <div class="nav-icon active" title="Checklists">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+      </svg>
+    </div>
+    <!-- Git pull request -->
+    <div class="nav-icon" title="Reconciliation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 012 2v7"/><path d="M6 9v12"/>
+      </svg>
+    </div>
+    <!-- Book -->
+    <div class="nav-icon" title="Documentation">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/>
+      </svg>
+    </div>
+    <div class="nav-divider"></div>
+    <!-- Bar line chart -->
+    <div class="nav-icon" title="Analytics">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-4"/>
+      </svg>
+    </div>
+    <!-- Dollar -->
+    <div class="nav-icon" title="Financials">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+      </svg>
+    </div>
+    <!-- Sticker / label -->
+    <div class="nav-icon" title="Labels">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+    </div>
+  </div>
+  <div class="sidebar-avatar">
+    <div class="av-circle" title="Your profile">AJ</div>
+  </div>
+</nav>
+
+<!-- ── Main ───────────────────────────────────── -->
+<div id="main">
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <span id="topbar-title">Checklist</span>
+    <div id="topbar-right">
+      <!-- Org selector -->
+      <button class="org-btn">
+        <div class="org-dot">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        Acme Inc.
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+      <!-- Locked toggle -->
+      <button class="locked-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+        Locked
+        <div class="toggle-track"><div class="toggle-knob"></div></div>
+      </button>
+      <!-- Date nav -->
+      <div class="date-nav">
+        <button class="date-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="date-chip">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Aug, 14
+        </div>
+        <button class="date-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <!-- User avatar -->
+      <div class="topbar-av" title="Account">EJ</div>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div id="tabbar">
+    <button class="tab-item active">All Tasks</button>
+    <button class="tab-item">Analytics</button>
+    <button class="tab-item">Audit Trail</button>
+  </div>
+
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <div id="toolbar-left">
+      <button class="view-tab">Default</button>
+      <button class="view-tab-add" title="Add view">
+        <img src="https://www.figma.com/api/mcp/asset/dee05b07-1690-497d-8111-9ad55bf25478" width="16" height="16" alt="+" />
+      </button>
+    </div>
+    <div id="toolbar-right">
+      <!-- Column / sort grouped control -->
+      <div class="col-sort-group">
+        <button class="col-sort-btn" title="Columns">
+          <img src="https://www.figma.com/api/mcp/asset/50a7c84a-7d0f-4e36-b190-d202b697ef3a" width="16" height="16" alt="Columns" />
+        </button>
+        <button class="col-sort-btn" title="Sort">
+          <img src="https://www.figma.com/api/mcp/asset/26cd65b8-72e9-4e40-b99c-336ce4f4e6f8" width="16" height="16" alt="Sort" />
+        </button>
+      </div>
+      <!-- Search -->
+      <div class="search-box">
+        <img src="https://www.figma.com/api/mcp/asset/4709c2bf-10c0-47e2-bb92-73ac285e0a36" width="16" height="16" alt="Search" />
+        <span>Search</span>
+      </div>
+      <!-- Filters -->
+      <button class="filter-btn">
+        <img src="https://www.figma.com/api/mcp/asset/d691947c-42be-47fd-8f32-0a80b549c5c7" width="16" height="16" alt="Filter" />
+        <span>Filters</span>
+      </button>
+      <!-- Create -->
+      <button class="create-btn">
+        <span>Create</span>
+        <img src="https://www.figma.com/api/mcp/asset/b12563d7-89d3-4c9f-a26c-ba0aeb09a5f6" width="16" height="16" alt="▾" />
+      </button>
+      <!-- More -->
+      <button class="more-btn" title="More">
+        <img src="https://www.figma.com/api/mcp/asset/c8ed47c1-14a5-44ec-8166-b471d454e643" width="16" height="16" alt="…" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div id="table-area">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:38%"><div class="th-inner">Task name <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div></th>
+          <th style="width:12%"><div class="th-inner">Status</div></th>
+          <th style="width:16%"><div class="th-inner">Preparers</div></th>
+          <th style="width:9%"><div class="th-inner">Prep. date</div></th>
+          <th style="width:14%"><div class="th-inner">Reviewers</div></th>
+          <th style="width:7%"><div class="th-inner">Review date</div></th>
+          <th style="width:4%"><div class="th-inner">Tags</div></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Overlay (closes drawer on outside click) -->
+<div id="overlay" onclick="closeDrawer()"></div>
+
+<!-- Drawer -->
+<div id="drawer">
+  <iframe id="drawer-frame" src="checklist-status.html?mode=drawer"></iframe>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────
+const STATUS_STYLES = {
+  'not-started':      { label: 'Not started',  bg: '#f2f1f0', color: '#64615c' },
+  'in-progress':      { label: 'In progress',  bg: '#e8f0fe', color: '#1967d4' },
+  'preparing':        { label: 'Preparing',    bg: '#e8f0fe', color: '#1967d4' },
+  'ready-for-review': { label: 'Prepared',     bg: '#d1fae5', color: '#065f46' },
+  'reviewing':        { label: 'Under review', bg: '#ede9fe', color: '#6d28d9' },
+  'blocked':          { label: 'Blocked',      bg: '#fee793', color: '#3a3118' },
+  'change-requested': { label: 'Change req.',  bg: '#ffd59a', color: '#402a13' },
+  'completed':        { label: 'Completed',    bg: '#dcfce7', color: '#166534' },
+};
+
+const PEOPLE = {
+  AJ: { name: 'Avery Jefferson',  bg: '#dbeafe', color: '#1e40af' },
+  AH: { name: 'Anna Harrison',    bg: '#d1fae5', color: '#065f46' },
+  MH: { name: 'Michael Hayes',    bg: '#e0e7ff', color: '#4338ca' },
+  HM: { name: 'Henry Maxson',     bg: '#fce7f3', color: '#9d174d' },
+  AT: { name: 'Annie Thuener',    bg: '#fef3c7', color: '#92400e' },
+  OR: { name: 'Olivia Rhye',      bg: '#fae8ff', color: '#86198f' },
+  LB: { name: 'Loki Bright',      bg: '#ecfeff', color: '#0e7490' },
+  SD: { name: 'Sarah Davis',   bg: '#fef9c3', color: '#854d0e' },
+  CM: { name: 'Chris Martin',  bg: '#f0fdf4', color: '#166534' },
+  JW: { name: 'James Wilson',  bg: '#fff7ed', color: '#9a3412' },
+};
+
+const SECTIONS = [
+  {
+    id: '01', name: 'CASH & CASH EQUIVALENTS', total: 5, done: 1, expanded: true,
+    tasks: [
+      { id: 1,  name: 'End of month cash balance',                               status: 'reviewing',        prep: 'AJ', prepDate: 'Aug 2',  rev: 'HM', revDate: 'Aug 4',  tags: ['#Balance'],  scenario: 'reviewing' },
+      { id: 2,  name: 'Cash Transactions Posted to JPM 4382',                    status: 'blocked',          prep: 'AH', prepDate: 'Aug 6',  rev: 'HM', revDate: 'Aug 6',  tags: ['#Journal'],  scenario: 'blocked-preparer' },
+      { id: 3,  name: 'Cash Transactions Posted to SVB 8392',                    status: 'preparing',        prep: 'AJ', prepDate: 'Aug 6',  rev: 'HM', revDate: 'Aug 6',  tags: ['#Journal'],  scenario: 'preparing' },
+      { id: 4,  name: 'Cash Transactions Posted to NBKC 3242',                   status: 'not-started',      prep: 'AJ', prepDate: 'Aug 7',  rev: 'HM', revDate: 'Aug 7',  tags: ['#Journal'],  scenario: 'not-started' },
+      { id: 5,  name: 'Cash Reconciliation',                                     status: 'completed',        prep: 'AH', prepDate: 'Aug 3',  rev: 'HM', revDate: 'Aug 5',  tags: ['#Recon'],    scenario: 'completed' },
+    ],
+  },
+  {
+    id: '02', name: 'ACCOUNT RECEIVABLE', total: 4, done: 1, expanded: false,
+    tasks: [
+      { id: 6,  name: 'AR Aging Report Review',                                  status: 'completed',        prep: 'OR', prepDate: 'Aug 5',  rev: 'AT', revDate: 'Aug 7',  tags: ['#AR'],       scenario: 'completed' },
+      { id: 7,  name: 'Unbilled Revenue Accrual',                                status: 'preparing',        prep: 'LB', prepDate: 'Aug 8',  rev: 'AT', revDate: 'Aug 10', tags: ['#Accrual'],  scenario: 'preparing' },
+      { id: 8,  name: 'Customer Deposit Reconciliation',                          status: 'blocked',          prep: 'OR', prepDate: 'Aug 9',  rev: 'AT', revDate: 'Aug 11', tags: ['#Recon'],    scenario: 'blocked-deps' },
+      { id: 9,  name: 'Bad Debt Reserve Calculation',                             status: 'not-started',      prep: 'LB', prepDate: 'Aug 10', rev: 'AT', revDate: 'Aug 12', tags: ['#Reserve'],  scenario: 'not-started' },
+    ],
+  },
+  {
+    id: '03', name: 'PREPAID AND OTHER ASSETS', total: 3, done: 2, expanded: false,
+    tasks: [
+      { id: 10, name: 'Prepaid Insurance Amortization',                           status: 'completed',        prep: 'SD', prepDate: 'Aug 3',  rev: 'CM', revDate: 'Aug 5',  tags: ['#Prepaid'],  scenario: 'completed' },
+      { id: 11, name: 'Software License Prepaid Schedule',                        status: 'completed',        prep: 'SD', prepDate: 'Aug 4',  rev: 'CM', revDate: 'Aug 6',  tags: ['#Prepaid'],  scenario: 'completed' },
+      { id: 12, name: 'Deposits & Security Reconciliation',                       status: 'reviewing',        prep: 'AJ', prepDate: 'Aug 7',  rev: 'CM', revDate: 'Aug 9',  tags: ['#Recon'],    scenario: 'reviewing' },
+    ],
+  },
+  { id: '04', name: 'FIXED ASSET', total: 3, done: 3, expanded: false, tasks: [], completed: true },
+  {
+    id: '05', name: 'PAYROLL', total: 6, done: 1, expanded: true,
+    tasks: [
+      { id: 13, name: 'Review JP Payroll source and template',                    status: 'blocked',          prep: 'MH', prepDate: 'Jul 27', rev: 'AT', revDate: 'Jul 29', tags: ['#Journal'],  scenario: 'blocked-preparer' },
+      { id: 14, name: 'PTO Accrual',                                              status: 'reviewing',        prep: 'MH', prepDate: 'Jul 27', rev: 'AT', revDate: 'Jul 29', tags: ['#Journal'],  scenario: 'reviewing' },
+      { id: 15, name: 'Commission & Bonus Accrual',                               status: 'ready-for-review', prep: 'MH', prepDate: 'Jul 29', rev: 'AT', revDate: 'Aug 1',  tags: ['#Journal'],  scenario: 'ready-for-review' },
+      { id: 16, name: 'Commission & Bonus Amortization',                          status: 'blocked',          prep: 'MH', prepDate: 'Jul 29', rev: 'AT', revDate: 'Aug 1',  tags: ['#Recon'],    scenario: 'blocked-deps' },
+      { id: 17, name: 'Post interest transactions manually in investment account', status: 'in-progress',     prep: 'MH', prepDate: 'Jul 30', rev: 'AT', revDate: 'Aug 2',  tags: ['#Recon'],    scenario: 'agent-max' },
+      { id: 18, name: 'Payroll BS Reconciliation',                                status: 'not-started',      prep: 'MH', prepDate: 'Aug 3',  rev: 'AT', revDate: 'Aug 5',  tags: ['#Recon'],    scenario: 'not-started' },
+    ],
+  },
+  {
+    id: '06', name: 'LEASE AND OTHER LIABILITIES', total: 5, done: 2, expanded: false,
+    tasks: [
+      { id: 19, name: 'Operating Lease Schedule (ASC 842)',                       status: 'completed',        prep: 'JW', prepDate: 'Aug 2',  rev: 'HM', revDate: 'Aug 4',  tags: ['#Lease'],    scenario: 'completed' },
+      { id: 20, name: 'Finance Lease Amortization',                               status: 'completed',        prep: 'JW', prepDate: 'Aug 3',  rev: 'HM', revDate: 'Aug 5',  tags: ['#Lease'],    scenario: 'completed' },
+      { id: 21, name: 'Accrued Liabilities Reconciliation',                       status: 'preparing',        prep: 'AH', prepDate: 'Aug 8',  rev: 'HM', revDate: 'Aug 10', tags: ['#Accrual'],  scenario: 'preparing' },
+      { id: 22, name: 'Deferred Revenue Recognition',                             status: 'blocked',          prep: 'OR', prepDate: 'Aug 9',  rev: 'HM', revDate: 'Aug 11', tags: ['#Revenue'],  scenario: 'blocked-subtask' },
+      { id: 23, name: 'Warranty Reserve Analysis',                                status: 'not-started',      prep: 'JW', prepDate: 'Aug 12', rev: 'HM', revDate: 'Aug 14', tags: ['#Reserve'],  scenario: 'not-started' },
+    ],
+  },
+  {
+    id: '07', name: 'VIRTUAL CARD ACCRUAL', total: 2, done: 0, expanded: false,
+    tasks: [
+      { id: 24, name: 'Virtual Card Spend Accrual',                               status: 'not-started',      prep: 'SD', prepDate: 'Aug 14', rev: 'AT', revDate: 'Aug 16', tags: ['#Accrual'],  scenario: 'not-started' },
+      { id: 25, name: 'Corporate Card Reconciliation',                             status: 'not-started',      prep: 'CM', prepDate: 'Aug 14', rev: 'AT', revDate: 'Aug 16', tags: ['#Recon'],    scenario: 'not-started' },
+    ],
+  },
+];
+
+// ─────────────────────────────────────────
+// Render
+// ─────────────────────────────────────────
+function avatar(key) {
+  const p = PEOPLE[key];
+  return `<div class="av-init" style="background:${p.bg};color:${p.color};">${key}</div>`;
+}
+
+function statusBadge(key) {
+  const s = STATUS_STYLES[key] || STATUS_STYLES['not-started'];
+  return `<span class="status-badge" style="background:${s.bg};color:${s.color};">${s.label}</span>`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  let html = '';
+
+  SECTIONS.forEach(sec => {
+    const countLabel = sec.completed ? '' : `(${sec.done}/${sec.total})`;
+    const completedBadge = sec.completed ? '<span class="completed-badge">Completed</span>' : '';
+    const chevronClass = sec.expanded ? '' : 'collapsed';
+
+    html += `
+      <tr class="section-row" data-section="${sec.id}">
+        <td colspan="7">
+          <div class="section-cell">
+            <span class="section-chevron ${chevronClass}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+            <span class="section-name">${sec.id} ${sec.name}</span>
+            <span class="section-count">${countLabel}</span>
+            ${completedBadge}
+          </div>
+        </td>
+      </tr>
+    `;
+
+    if (sec.expanded) {
+      sec.tasks.forEach(task => {
+        const prep = PEOPLE[task.prep];
+        const rev  = PEOPLE[task.rev];
+        html += `
+          <tr class="task-row" data-task="${task.id}" data-scenario="${task.scenario || 'not-started'}">
+            <td>
+              <div class="task-name-cell">
+                <div class="task-indent"></div>
+                <span class="task-name">${task.name}</span>
+              </div>
+            </td>
+            <td>${statusBadge(task.status)}</td>
+            <td>
+              <div class="person-cell">
+                ${avatar(task.prep)}
+                <span class="person-name">${prep.name}</span>
+              </div>
+            </td>
+            <td><span class="date-cell">${task.prepDate}</span></td>
+            <td>
+              <div class="person-cell">
+                ${avatar(task.rev)}
+                <span class="person-name">${rev.name}</span>
+              </div>
+            </td>
+            <td><span class="date-cell">${task.revDate}</span></td>
+            <td>
+              <div class="tags-cell">
+                ${task.tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+  });
+
+  tbody.innerHTML = html;
+  attachRowListeners();
+}
+
+// ─────────────────────────────────────────
+// Interactions
+// ─────────────────────────────────────────
+let selectedTaskId = null;
+
+function attachRowListeners() {
+  // Section collapse/expand
+  document.querySelectorAll('.section-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const id = row.dataset.section;
+      const sec = SECTIONS.find(s => s.id === id);
+      if (!sec || !sec.tasks.length) return;
+      sec.expanded = !sec.expanded;
+      renderTable();
+    });
+  });
+
+  // Task rows → open drawer
+  document.querySelectorAll('.task-row').forEach(row => {
+    row.addEventListener('click', () => openDrawer(row));
+  });
+}
+
+function openDrawer(row) {
+  document.querySelectorAll('.task-row.selected').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  selectedTaskId = row.dataset.task;
+  const scenario = row.dataset.scenario || 'not-started';
+  document.getElementById('drawer-frame').src = `checklist-status.html?mode=drawer&scenario=${encodeURIComponent(scenario)}`;
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  document.querySelectorAll('.task-row.selected').forEach(r => r.classList.remove('selected'));
+  selectedTaskId = null;
+}
+
+// Keyboard: Escape closes drawer
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
+});
+
+// Listen for close signal from drawer iframe
+window.addEventListener('message', e => {
+  if (e.data === 'close-drawer') closeDrawer();
+});
+
+// Initial render
+renderTable();
+</script>
+
+</body>
+</html>
