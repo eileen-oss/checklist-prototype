@@ -1293,9 +1293,9 @@ function taskAggregate(prepStatuses, revStatuses, depStatuses, subtaskStatuses) 
   const allPrepDone = prepStatuses.length > 0 && prepStatuses.every(s => s === 'completed');
   const allRevDone  = revStatuses.length  > 0 && revStatuses.every(s  => s === 'completed');
   if (allPrepDone && allRevDone)                                        return 'completed';
-  if (allPrepDone && revStatuses.some(s => s === 'in-progress'))        return 'reviewing';
+  if (allPrepDone && revStatuses.some(s => s === 'in-progress' || s === 'completed')) return 'reviewing';
   if (allPrepDone)                                                      return 'ready-for-review';
-  if (prepStatuses.some(s => s === 'in-progress'))                      return 'preparing';
+  if (prepStatuses.some(s => s === 'in-progress' || s === 'completed')) return 'preparing';
   return 'not-started';
 }
 
@@ -1361,12 +1361,20 @@ function applyStatusBadge(id, key) {
   if (!el) return;
   const s = STATUS[key];
   let label = s.label;
+  let bg    = s.badgeBg;
+  let color = s.badgeColor;
   if (key === 'in-progress') {
-    label = id === 'view-reviewers-badge' ? 'Reviewing' : 'Preparing';
+    if (id === 'view-reviewers-badge') {
+      label = 'Reviewing';
+      bg    = TASK_STATUS['reviewing'].bg;
+      color = TASK_STATUS['reviewing'].color;
+    } else {
+      label = 'Preparing';
+    }
   }
   el.textContent      = label;
-  el.style.background = s.badgeBg;
-  el.style.color      = s.badgeColor;
+  el.style.background = bg;
+  el.style.color      = color;
 }
 
 function applyTaskBadge(id, key) {
